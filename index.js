@@ -1,3 +1,3 @@
 import { AppRegistry } from 'react-native';
 import App from './App';
-AppRegistry.registerComponent('lucid', () => App);
+AppRegistry.registerComponent('keydrop', () => App);

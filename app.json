@@ -10,6 +10,6 @@
       "transformer": "node_modules/react-native-typescript-transformer/index.js"
     }
   },
-  "name": "lucid",
-  "displayName": "lucid"
+  "name": "keydrop",
+  "displayName": "keydrop"
 }

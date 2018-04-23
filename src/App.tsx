@@ -1,44 +1,47 @@
 import * as React from 'react';
-
-import { StackNavigator, TabNavigator } from 'react-navigation';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+    createStore,
+    combineReducers,
+    applyMiddleware,
+    compose,
+} from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import { Provider } from 'react-redux';
+import { StackNavigator, TabNavigator, NavigationRouteConfigMap } from 'react-navigation';
 import { View, Text, StatusBar, Platform } from 'react-native';
 
-
-const Root = TabNavigator(
-    {
-        Main: {
-            screen: ({navigation}) => (<View><Text>Hello</Text></View>),
-        },
-    },
-    {
-        tabBarPosition: 'bottom',
-        animationEnabled: false,
-        swipeEnabled: false,
-        navigationOptions: {
-
-        }
-    }
-);
-
-
-const Scenes = {
-    Root: {
-        screen: Root
-    },
+interface AppState {
 }
 
-const AppNavigator = StackNavigator(Scenes,
+export const appStateReducer = (state: AppState = {}, action: any): AppState => {
+    return state;
+};
+
+const defaultState: AppState = {};
+const reducer = combineReducers<AppState>({appStateReducer});
+const store = createStore(
+    reducer,
+    defaultState,
+    compose(
+        applyMiddleware(thunkMiddleware)
+    )
+);
+store.subscribe(() => console.log(store.getState()));
+
+const HomeScreen = (props) => <View><Text>Hello</Text></View>;
+
+const AppNavigator = StackNavigator(
     {
-        mode: 'modal',
+        HomeScreen: { screen: HomeScreen},
     }
 );
 
 export default class App extends React.Component {
-
-    render() {
+    public render() {
         return (
-            <AppNavigator />
+            <Provider store={store}>
+                <AppNavigator />
+            </Provider>
         );
     }
 }
