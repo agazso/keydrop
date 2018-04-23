@@ -51,7 +51,7 @@ export const store = createStore(
     reducer,
     defaultState,
     compose(
-        applyMiddleware(thunkMiddleware)
-    )
+        applyMiddleware(thunkMiddleware),
+    ),
 );
 store.subscribe(() => console.log(store.getState()));

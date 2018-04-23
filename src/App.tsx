@@ -14,7 +14,7 @@ const AppNavigator = StackNavigator(
         navigationOptions: {
             headerTitle: <Text>Keydrop</Text>,
         },
-    }
+    },
 );
 
 export default class App extends React.Component {
