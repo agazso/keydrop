@@ -1,0 +1,13 @@
+{
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "files.associations": {
+        "__bit_reference": "cpp",
+        "algorithm": "cpp",
+        "deque": "cpp",
+        "future": "cpp",
+        "string": "cpp",
+        "*.ipp": "cpp",
+        "*.tcc": "cpp",
+        "rope": "cpp"
+    }
+}
