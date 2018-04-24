@@ -16,7 +16,7 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    createUser: (username: string) => void;
+    onCreateUser: (username: string) => void;
 }
 
 type Props = StateProps & DispatchProps;
@@ -42,7 +42,7 @@ export const Registration = (props: Props) => (
             autoFocus={true}
             underlineColorAndroid={Colors.IOS_GRAY}
             placeholder={PlaceholderText}
-            onSubmitEditing={(text) => props.createUser(text)}
+            onSubmitEditing={(text) => props.onCreateUser(text)}
         />
         <Separator/>
     </KeyboardAvoidingView>

@@ -14,14 +14,19 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    createUser: (username: string) => void;
+    onCreateUser: (username: string) => void;
+    onCreateContact: (data: ContactData) => void;
 }
 
 type Props = StateProps & DispatchProps;
 
 const InnerComponent = (props: Props) => props.alreadyHasKey
-    ? <ContactList contacts={props.contacts} user={props.user} />
-    : <Registration createUser={props.createUser}/>
+    ? <ContactList
+            contacts={props.contacts}
+            user={props.user}
+            onCreateContact={props.onCreateContact}
+      />
+    : <Registration onCreateUser={props.onCreateUser}/>
     ;
 
 export const HomeScreen = (props: Props) =>

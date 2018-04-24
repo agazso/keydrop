@@ -13,6 +13,7 @@ import {
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import QRCode from 'react-native-qrcode-svg';
+import QRCodeScanner from 'react-native-qrcode-scanner';
 import { generateSecureRandom } from 'react-native-securerandom';
 
 import { Contact } from '../models/Contact';
@@ -26,6 +27,8 @@ const PaddingBottom = 60;
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+const QRCodeWidth = 200;
+const QRCodeHeight = 200;
 
 const ContactItem = (props) =>
     <View style={styles.listItem}>
@@ -35,17 +38,28 @@ const ContactItem = (props) =>
         </View>
     </View>;
 
-interface ContactListProps {
+interface ContactListStateProps {
     contacts: Contact[];
     user: User;
 }
+
+interface ContactListDispatchProps {
+    onCreateContact: (data: ContactData) => void;
+}
+
+type ContactListProps = ContactListStateProps & ContactListDispatchProps;
 
 export class ContactList extends React.PureComponent<ContactListProps> {
     public render() {
         return (
             <AnimatedList
                 ListFooterComponent={<View style={{paddingBottom: PaddingBottom}} ></View>}
-                ListHeaderComponent={<ListHeader user={this.props.user}/>}
+                ListHeaderComponent={
+                    <ListHeader
+                        user={this.props.user}
+                        onCreateContact={this.props.onCreateContact}
+                    />
+                }
                 renderItem={
                     (item) => (
                         <ContactItem
@@ -66,12 +80,9 @@ export class ContactList extends React.PureComponent<ContactListProps> {
     }
 }
 
-const addContact = () => {
-    Alert.alert('addContact');
-};
-
 interface ListHeaderProps {
     user: User;
+    onCreateContact: (data: ContactData) => void;
 }
 
 interface ListHeaderState {
@@ -113,12 +124,12 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
 
     private generateQRCodeValue = async () => {
         const randomBytes = await generateSecureRandom(32);
-
-        return JSON.stringify({
+        const data: ContactData = {
             publicKey: this.props.user.identity.publicKey,
             timestamp: Date.now(),
             random: randomBytes,
-        });
+        };
+        return JSON.stringify(data);
     }
 
     private AddContactListHeader = (props) => (
@@ -154,7 +165,18 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                 </View>
 
                 <View style={styles.qrCodeContainer}>
-
+                    <QRCodeScanner
+                        onRead={this.onScanSuccess}
+                        containerStyle={{
+                            width: QRCodeWidth,
+                            height: QRCodeHeight,
+                        }}
+                        cameraStyle={{
+                            width: QRCodeWidth,
+                            height: QRCodeHeight,
+                        }}
+                        fadeIn={false}
+                    />
                 </View>
 
                 <View style={styles.listHeaderRightButton}>
@@ -163,7 +185,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                     </TouchableView>
 
                     <TouchableView>
-                        <Ionicon name='ios-share-outline' size={32} />
+                        <Ionicon name='ios-attach-outline' size={32} />
                     </TouchableView>
                 </View>
             </View>
@@ -192,6 +214,17 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
         this.setState({
             headerState: 'default',
         });
+    }
+
+    private onScanSuccess = (event) => {
+        try {
+            const data: ContactData = JSON.parse(event.data);
+            this.props.onCreateContact(data);
+        } catch (e) {
+            console.log(e);
+        }
+
+        this.onClose();
     }
 }
 
@@ -245,5 +278,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
     },
     qrCodeContainer: {
+        width: QRCodeWidth,
+        height: QRCodeHeight,
     },
 });

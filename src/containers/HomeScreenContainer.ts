@@ -14,10 +14,20 @@ const mapStateToProps = (state: AppState, ownProps): StateProps => {
     };
 };
 
+const isTimestampValid = (timestamp: number, now: number = Date.now()): boolean => {
+    const TimestampValidityMillis = 60 * 1000;
+    return timestamp + TimestampValidityMillis < now;
+}
+
 const mapDispatchToProps = (dispatch): DispatchProps => {
     return {
-        createUser: (username: string) => {
+        onCreateUser: (username: string) => {
             dispatch(Actions.createUser(username));
+        },
+        onCreateContact: (data: ContactData) => {
+            if (isTimestampValid(data.timestamp)) {
+                dispatch(Actions.createContactSendReply(data.publicKey, data.timestamp, data.random));
+            }
         },
     };
 };

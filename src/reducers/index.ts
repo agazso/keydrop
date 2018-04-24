@@ -83,7 +83,14 @@ const defaultState: AppState = {
     contacts: defaultContacts,
     user: defaultUser,
 };
+
 const contactsReducer = (contacts: Map<number, Contact> = defaultContacts, action: ActionsTypes): Map<number, Contact> => {
+    switch (action.type) {
+        case 'CREATE-CONTACT-SEND-REPLY': {
+            console.log('Sending: ', action);
+            return contacts;
+        }
+    }
     return contacts;
 };
 

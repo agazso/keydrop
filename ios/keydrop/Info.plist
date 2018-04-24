@@ -51,6 +51,13 @@
 			</dict>
 		</dict>
 	</dict>
+
+	<key>NSCameraUsageDescription</key>
+	<string>Please let Keydrop access your camera to scan the code</string>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Please let Keydrop access your camera roll to pick a photo</string>
+
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>
