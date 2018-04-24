@@ -8,14 +8,8 @@ import {
 import thunkMiddleware from 'redux-thunk';
 
 import { Contact } from '../models/Contact';
-import { PrivateIdentity } from '../models/Identity';
+import { User } from '../models/User';
 import { ActionsTypes } from '../actions/Actions';
-
-interface User {
-    name: string;
-    identity: PrivateIdentity;
-    ephemeralIdentity?: PrivateIdentity;
-}
 
 export interface AppState {
     contacts: Map<number, Contact>;

@@ -10,6 +10,7 @@ const mapStateToProps = (state: AppState, ownProps): StateProps => {
     return {
         contacts: state.contacts.toArray(),
         alreadyHasKey: state.user.name !== '',
+        user: state.user,
     };
 };
 

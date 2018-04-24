@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Platform } from 'react-native';
 
-import { ContactList } from './ContactList';
 import { Colors } from '../styles';
 import { Contact } from '../models/Contact';
+import { User } from '../models/User';
 import { Registration } from './Registration';
+import { ContactList } from './ContactList';
 
 export interface StateProps {
     contacts: Contact[];
     alreadyHasKey: boolean;
+    user: User;
 }
 
 export interface DispatchProps {
@@ -18,7 +20,7 @@ export interface DispatchProps {
 type Props = StateProps & DispatchProps;
 
 const InnerComponent = (props: Props) => props.alreadyHasKey
-    ? <ContactList contacts={props.contacts} />
+    ? <ContactList contacts={props.contacts} user={props.user} />
     : <Registration createUser={props.createUser}/>
     ;
 
