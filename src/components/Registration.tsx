@@ -1,5 +1,12 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    Platform,
+    KeyboardAvoidingView,
+} from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
 import { Colors, DefaultFont } from '../styles';
@@ -22,7 +29,9 @@ const Separator = (props) => Platform.OS === 'ios'
 const PlaceholderText = 'What\'s your name?';
 
 export const Registration = (props: Props) => (
-    <View style={styles.registrationContainer}>
+    <KeyboardAvoidingView
+        style={styles.registrationContainer}
+    >
         <Text style={styles.textHello}>Hello!</Text>
         <Text style={styles.textCopy}>Keydrop is an app for sharing secrets.</Text>
         <View style={styles.contactIconContainer}>
@@ -36,12 +45,13 @@ export const Registration = (props: Props) => (
             onSubmitEditing={(text) => props.createUser(text)}
         />
         <Separator/>
-    </View>
+    </KeyboardAvoidingView>
 );
 
 const styles = StyleSheet.create({
     registrationContainer: {
         flexDirection: 'column',
+        flex: 1,
         backgroundColor: Colors.WHITE,
         padding: 0,
         margin: 0,
