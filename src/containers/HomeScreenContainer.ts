@@ -2,23 +2,22 @@ import { connect } from 'react-redux';
 
 import { AppState } from '../reducers/index';
 import { Contact } from '../models/Contact';
-import { HomeScreen } from '../components/HomeScreen';
+import { HomeScreen, StateProps, DispatchProps } from '../components/HomeScreen';
 
-interface StateProps {
-    contacts: Contact[];
-}
-
-interface DispatchProps {
-}
+import * as Actions from '../actions/Actions';
 
 const mapStateToProps = (state: AppState, ownProps): StateProps => {
     return {
         contacts: state.contacts.toArray(),
+        alreadyHasKey: state.user.name !== '',
     };
 };
 
 const mapDispatchToProps = (dispatch): DispatchProps => {
     return {
+        createUser: (username: string) => {
+            dispatch(Actions.createUser(username));
+        },
     };
 };
 

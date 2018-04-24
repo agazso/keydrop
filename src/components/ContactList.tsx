@@ -1,8 +1,21 @@
 import * as React from 'react';
-import { View, Text, Animated, FlatList, Dimensions, StyleSheet } from 'react-native';
+import {
+    View,
+    Text,
+    Animated,
+    FlatList,
+    Dimensions,
+    StyleSheet,
+    Button,
+    TouchableWithoutFeedback,
+    Alert,
+} from 'react-native';
+import Ionicon from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { Contact } from '../models/Contact';
-import { Colors, DefaultFont } from '../styles';
+import { Colors, DefaultFont, IconSize } from '../styles';
+import { TouchableView } from './TouchableView';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList);
 const PaddingBottom = 60;
@@ -48,9 +61,22 @@ export class ContactList extends React.PureComponent<ContactListProps> {
     }
 }
 
+const addContact = () => {
+    Alert.alert('addContact');
+};
+
 const ListHeader = (props) => (
     <View style={styles.listHeader}>
-        <View></View>
+        <View style={styles.listHeaderButtonContainer}>
+            <TouchableView style={styles.listHeaderLeftButton} onPress={addContact}>
+                <Ionicon name='ios-contacts' size={128} color={Colors.DEFAULT_ACTION_COLOR} />
+                <Button title='Add contact' onPress={addContact} />
+            </TouchableView>
+            <View style={styles.listHeaderRightButton}>
+                <MaterialCommunityIcon name='qrcode' size={128} color={Colors.DEFAULT_ACTION_COLOR} />
+                <Button title='Scan code' onPress={addContact} />
+            </View>
+        </View>
         <View style={styles.listHeaderBottom}>
             <View style={styles.horizontalRuler}></View>
         </View>
@@ -76,9 +102,18 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
     },
     listHeader: {
-        height: Height / 2,
+        height: 200,
         flexDirection: 'column',
         justifyContent: 'space-between',
+    },
+    listHeaderButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+    },
+    listHeaderLeftButton: {
+        flexDirection: 'column',
+    },
+    listHeaderRightButton: {
     },
     listHeaderBottom: {
     },

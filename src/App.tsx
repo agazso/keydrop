@@ -1,10 +1,21 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { StackNavigator, TabNavigator, NavigationRouteConfigMap } from 'react-navigation';
-import { View, Text, StatusBar, Platform } from 'react-native';
+import { View, Text, StatusBar, Platform, TouchableWithoutFeedback } from 'react-native';
 
 import { store } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
+
+const onPress = () => {
+    // TODO scroll to top
+};
+
+const HeaderTitleComponent = (props) =>
+    <TouchableWithoutFeedback onPress={onPress}>
+        <View>
+            <Text>Keydrop</Text>
+        </View>
+    </TouchableWithoutFeedback>;
 
 const AppNavigator = StackNavigator(
     {
@@ -12,7 +23,7 @@ const AppNavigator = StackNavigator(
     },
     {
         navigationOptions: {
-            headerTitle: <Text>Keydrop</Text>,
+            headerTitle: <HeaderTitleComponent/>,
         },
     },
 );
