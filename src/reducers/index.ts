@@ -99,8 +99,12 @@ const userReducer = (user: User = defaultUser, action: ActionsTypes): User => {
             return {
                 name: action.name,
                 identity: {
-                    publicKey: '0x',
-                    privateKey: '0x',
+                    publicKey: 'e8869123ec894bfb8bce8dc3b083ecde6ba16abe3ea7ff2b32ca62eaded164bdf3aae44766c1431477d570378e81cb3fb674ae7dcdcb4257abdd1491f12641b8',
+                    privateKey: '0x45e1805a7b6eee384820ac97c90b39c51265ac8e39715fa8d76a4f71fdb90def',
+                },
+                ephemeralIdentity: {
+                    publicKey: '8a6cf93a2f199009db635a03e4d7b8a2fad4c9044ad237aba723e459b32d362d46b9848fa2525df47a502fe68777ab368e5be85f609b756e28afb8620a5551ba',
+                    privateKey: '0xc685320e66ad6cdff4ecd5dc842fb24812e2c6dd87558cd28c48d7f1280bd085',
                 },
             };
         }
