@@ -16,6 +16,7 @@ export interface StateProps {
 export interface DispatchProps {
     onCreateUser: (username: string) => void;
     onCreateContact: (data: ContactData) => void;
+    onNotifyContacts: () => void;
 }
 
 type Props = StateProps & DispatchProps;
@@ -25,6 +26,7 @@ const InnerComponent = (props: Props) => props.alreadyHasKey
             contacts={props.contacts}
             user={props.user}
             onCreateContact={props.onCreateContact}
+            onNotifyContacts={props.onNotifyContacts}
       />
     : <Registration onCreateUser={props.onCreateUser}/>
     ;

@@ -36,6 +36,9 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
                 dispatch(Actions.createContactSendReply(data.publicKey, data.timestamp, data.random));
             }
         },
+        onNotifyContacts: () => {
+            dispatch(Actions.notifyContacts());
+        },
     };
 };
 

@@ -46,11 +46,16 @@ interface ContactListStateProps {
 
 interface ContactListDispatchProps {
     onCreateContact: (data: ContactData) => void;
+    onNotifyContacts: () => void;
 }
 
 type ContactListProps = ContactListStateProps & ContactListDispatchProps;
 
 export class ContactList extends React.PureComponent<ContactListProps> {
+    public componentDidMount() {
+        this.props.onNotifyContacts();
+    }
+
     public render() {
         if (this.props.contacts.length === 0) {
             return (
