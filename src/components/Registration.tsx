@@ -27,13 +27,15 @@ const Separator = (props) => Platform.OS === 'ios'
     ;
 
 const PlaceholderText = 'What\'s your name?';
+const CopyText = 'Keydrop is an app for sharing secrets.';
+const HelloText = 'Hello!';
 
 export const Registration = (props: Props) => (
     <KeyboardAvoidingView
         style={styles.registrationContainer}
     >
-        <Text style={styles.textHello}>Hello!</Text>
-        <Text style={styles.textCopy}>Keydrop is an app for sharing secrets.</Text>
+        <Text style={styles.textHello}>{HelloText}</Text>
+        <Text style={styles.textCopy}>{CopyText}</Text>
         <View style={styles.contactIconContainer}>
             <Ionicon name='ios-contact' size={128} color={Colors.IOS_GRAY} />
         </View>
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
     textInputName: {
         height: 50,
         fontSize: 32,
-        color: Colors.IOS_GRAY,
+        color: Colors.DARK_GRAY,
         paddingHorizontal: 50,
         textAlign: 'center',
     },
