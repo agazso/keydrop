@@ -1,11 +1,18 @@
+import { generateSecureRandom } from 'react-native-securerandom';
 
-const randomString = 'a24c4f9eb98387d52bbbe6ffc73a04936d71d4d39cc6398d7f556384cc48f56597f460483a9a2d89a1e75721421f19d7c30f7b6faa590fbd4b93a00b77b252fd';
+export const generateRandomString = async (lengthInBytes: number): Promise<string> => {
+    const randomBytes: Uint8Array = await generateSecureRandom(lengthInBytes);
+    return randomBytes.reduce<string>(
+        (acc, value) => acc + ('0' + value.toString(16)).slice(-2),
+        '',
+    );
+};
 
 export const getRandomStrings = async (arrayLength: number): Promise<string[]> => {
-    return new Promise<string[]>( (resolve, reject) => {
+    return new Promise<string[]>( async (resolve, reject) => {
         const randoms = new Array(arrayLength);
         for (let i = 0; i < arrayLength; i++) {
-            randoms[i] = randomString;
+            randoms[i] = await generateRandomString(32);
         }
         resolve(randoms);
     });

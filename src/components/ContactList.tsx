@@ -15,13 +15,13 @@ import Ionicon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import QRCode from 'react-native-qrcode-svg';
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { generateSecureRandom } from 'react-native-securerandom';
 
 import { Contact } from '../models/Contact';
 import { Colors, DefaultFont, IconSize } from '../styles';
 import { TouchableView } from './TouchableView';
 import { PrivateIdentity } from '../models/Identity';
 import { User } from '../models/User';
+import { generateRandomString } from '../random';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList);
 const PaddingBottom = 60;
@@ -195,7 +195,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
     )
 
     private generateQRCodeValue = async () => {
-        const randomBytes = await generateSecureRandom(32);
+        const randomBytes = await generateRandomString(32);
         const data: ContactData = {
             publicKey: this.props.user.identity.publicKey,
             timestamp: Date.now(),
