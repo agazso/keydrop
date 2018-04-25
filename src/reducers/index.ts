@@ -9,17 +9,20 @@ import thunkMiddleware from 'redux-thunk';
 
 import { Contact } from '../models/Contact';
 import { User } from '../models/User';
-import { ActionsTypes } from '../actions/Actions';
+import { ActionTypes, timeTick } from '../actions/Actions';
 
 export interface AppState {
     contacts: Map<number, Contact>;
     user: User;
+    currentTimestamp: number;
 }
 
 interface Contacts {
     [key: number]: Contact;
 }
 
+const now = Date.now();
+const Sec = 1000;
 const defaultContacts = Map<number, Contact>({
     1: {
         _id: 1,
@@ -27,7 +30,7 @@ const defaultContacts = Map<number, Contact>({
         name: 'Attila\'s iPhone',
         publicKey: '0x',
         knownSince: 0,
-        lastSeen: 0,
+        lastSeen: now + 30 * Sec,
     },
     2: {
         _id: 2,
@@ -35,7 +38,7 @@ const defaultContacts = Map<number, Contact>({
         name: 'Mark',
         publicKey: '0x',
         knownSince: 0,
-        lastSeen: 0,
+        lastSeen: now + 20 * Sec,
     },
     3: {
         _id: 3,
@@ -43,7 +46,7 @@ const defaultContacts = Map<number, Contact>({
         name: 'Dr. Zoidberg',
         publicKey: '0x',
         knownSince: 0,
-        lastSeen: 0,
+        lastSeen: now + 10 * Sec,
     },
     4: {
         _id: 4,
@@ -82,9 +85,10 @@ const defaultUser: User = {
 const defaultState: AppState = {
     contacts: defaultContacts,
     user: defaultUser,
+    currentTimestamp: Date.now(),
 };
 
-const contactsReducer = (contacts: Map<number, Contact> = defaultContacts, action: ActionsTypes): Map<number, Contact> => {
+const contactsReducer = (contacts: Map<number, Contact> = defaultContacts, action: ActionTypes): Map<number, Contact> => {
     switch (action.type) {
         case 'CREATE-CONTACT-SEND-REPLY': {
             console.log('Sending: ', action);
@@ -94,7 +98,7 @@ const contactsReducer = (contacts: Map<number, Contact> = defaultContacts, actio
     return contacts;
 };
 
-const userReducer = (user: User = defaultUser, action: ActionsTypes): User => {
+const userReducer = (user: User = defaultUser, action: ActionTypes): User => {
     switch (action.type) {
         case 'CREATE-USER': {
             return {
@@ -113,9 +117,19 @@ const userReducer = (user: User = defaultUser, action: ActionsTypes): User => {
     return user;
 };
 
+const currentTimestampReducer = (currentTimestamp: number = Date.now(), action: ActionTypes): number => {
+    switch (action.type) {
+        case 'TIME-TICK': {
+            return action.currentTimestamp;
+        }
+    }
+    return currentTimestamp;
+};
+
 export const reducer = combineReducers<AppState>({
     contacts: contactsReducer,
     user: userReducer,
+    currentTimestamp: currentTimestampReducer,
 });
 
 export const store = createStore(
@@ -126,3 +140,7 @@ export const store = createStore(
     ),
 );
 store.subscribe(() => console.log(store.getState()));
+
+setInterval(() => {
+    store.dispatch(timeTick(Date.now()));
+}, 1000);

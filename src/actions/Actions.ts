@@ -1,8 +1,9 @@
 import { NavigationAction } from 'react-navigation';
 
-export type ActionsTypes =
+export type ActionTypes =
     | CreateUserAction
     | CreateContactSendReplyAction
+    | TimeTickAction
     ;
 
 export interface CreateUserAction {
@@ -17,6 +18,11 @@ export interface CreateContactSendReplyAction {
     random: string;
 }
 
+export interface TimeTickAction {
+    type: 'TIME-TICK';
+    currentTimestamp: number;
+}
+
 export const createUser = (name: string): CreateUserAction => ({
     type: 'CREATE-USER',
     name,
@@ -27,4 +33,9 @@ export const createContactSendReply = (publicKey: string, timestamp: number, ran
     publicKey,
     timestamp,
     random,
+});
+
+export const timeTick = (currentTimestamp: number): TimeTickAction => ({
+    type: 'TIME-TICK',
+    currentTimestamp,
 });
