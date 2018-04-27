@@ -10,6 +10,7 @@ import {
     TouchableWithoutFeedback,
     Alert,
     Easing,
+    Platform,
 } from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -22,6 +23,7 @@ import { TouchableView } from './TouchableView';
 import { PrivateIdentity } from '../models/Identity';
 import { User } from '../models/User';
 import { generateRandomString } from '../random';
+import { testUserBob } from '../reducers/index';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList);
 const PaddingBottom = 60;
@@ -34,6 +36,7 @@ const QRCodeHeight = 200;
 const ContactItem = (props) =>
     <View style={styles.listItem}>
         <Text style={styles.listItemTitle}>{props.item.name}</Text>
+        <Text style={styles.listItemSubTitle}>{JSON.stringify(props.item)}</Text>
         <View style={[styles.itemSeparatorContainer, {width: Width}]}>
             <View style={styles.horizontalRuler}></View>
         </View>
@@ -42,6 +45,7 @@ const ContactItem = (props) =>
 interface ContactListStateProps {
     contacts: Contact[];
     user: User;
+    contactRandom: string;
 }
 
 interface ContactListDispatchProps {
@@ -60,12 +64,7 @@ export class ContactList extends React.PureComponent<ContactListProps> {
         if (this.props.contacts.length === 0) {
             return (
                 <EmptyListPlaceholder
-                    ListHeaderComponent={
-                        <ListHeader
-                            user={this.props.user}
-                            onCreateContact={this.props.onCreateContact}
-                        />
-                    }
+                    ListHeaderComponent={<this.ListHeader/>}
                 />
             );
         } else {
@@ -73,15 +72,18 @@ export class ContactList extends React.PureComponent<ContactListProps> {
         }
     }
 
+    private ListHeader = (props) => (
+        <ListHeader
+            user={this.props.user}
+            onCreateContact={this.props.onCreateContact}
+            contactRandom={this.props.contactRandom}
+        />
+    )
+
     private List = (props) => (
         <AnimatedList
             ListFooterComponent={<View style={{paddingBottom: PaddingBottom}} ></View>}
-            ListHeaderComponent={
-                <ListHeader
-                    user={this.props.user}
-                    onCreateContact={this.props.onCreateContact}
-                />
-            }
+            ListHeaderComponent={<this.ListHeader/>}
             renderItem={
                 (item) => (
                     <ContactItem
@@ -97,7 +99,7 @@ export class ContactList extends React.PureComponent<ContactListProps> {
     )
 
     private keyExtractor = (contact: Contact, index: number) => {
-        return '' + contact._id;
+        return contact.publicKey;
     }
 }
 
@@ -129,13 +131,15 @@ class EmptyListPlaceholder extends React.PureComponent<EmptyListPlaceholderProps
         return (
             <View style={styles.placeholderContainer}>
                 {this.props.ListHeaderComponent}
-                <View style={styles.wavePlaceholderContainer}>
-                    <Animated.View style={[styles.placeholderWawe1, {opacity}]} />
-                    <Animated.View style={[styles.placeholderWawe2, {opacity}]} />
-                    <Animated.View style={[styles.placeholderWawe3, {opacity}]} />
-                    <Animated.View style={[styles.placeholderWawe4, {opacity}]} />
-                    <Animated.View style={[styles.placeholderWawe5, {opacity}]} />
-                </View>
+                { Platform.OS === 'ios' &&
+                    <View style={styles.wavePlaceholderContainer}>
+                        <Animated.View style={[styles.placeholderWawe1, {opacity}]} />
+                        <Animated.View style={[styles.placeholderWawe2, {opacity}]} />
+                        <Animated.View style={[styles.placeholderWawe3, {opacity}]} />
+                        <Animated.View style={[styles.placeholderWawe4, {opacity}]} />
+                        <Animated.View style={[styles.placeholderWawe5, {opacity}]} />
+                    </View>
+                }
             </View>
         );
     }
@@ -154,6 +158,7 @@ class EmptyListPlaceholder extends React.PureComponent<EmptyListPlaceholderProps
 
 interface ListHeaderProps {
     user: User;
+    contactRandom: string;
     onCreateContact: (data: ContactData) => void;
 }
 
@@ -194,12 +199,11 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
         </View>
     )
 
-    private generateQRCodeValue = async () => {
-        const randomBytes = await generateRandomString(32);
+    private generateQRCodeValue = () => {
         const data: ContactData = {
             publicKey: this.props.user.identity.publicKey,
             timestamp: Date.now(),
-            random: randomBytes,
+            random: this.props.contactRandom,
         };
         return JSON.stringify(data);
     }
@@ -268,15 +272,15 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
         </View>
     )
 
-    private onAddContact = async () => {
-        const QRCodeValue = await this.generateQRCodeValue();
+    private onAddContact = () => {
+        const QRCodeValue = this.generateQRCodeValue();
         this.setState({
             headerState: 'add-contact',
             QRCodeValue: QRCodeValue,
         });
     }
 
-    private onScanCode = () => {
+    private onScanCode = async () => {
         this.setState({
             headerState: 'scan-code',
         });
@@ -324,6 +328,13 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         fontFamily: DefaultFont,
         paddingVertical: 10,
+        paddingLeft: 10,
+    },
+    listItemSubTitle: {
+        fontSize: 12,
+        color: Colors.LIGHT_GRAY,
+        fontFamily: DefaultFont,
+        paddingVertical: 2,
         paddingLeft: 10,
     },
     listHeader: {

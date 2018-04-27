@@ -11,6 +11,7 @@ export interface StateProps {
     contacts: Contact[];
     alreadyHasKey: boolean;
     user: User;
+    contactRandom: string;
 }
 
 export interface DispatchProps {
@@ -25,6 +26,7 @@ const InnerComponent = (props: Props) => props.alreadyHasKey
     ? <ContactList
             contacts={props.contacts}
             user={props.user}
+            contactRandom={props.contactRandom}
             onCreateContact={props.onCreateContact}
             onNotifyContacts={props.onNotifyContacts}
       />

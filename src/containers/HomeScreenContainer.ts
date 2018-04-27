@@ -3,28 +3,25 @@ import { connect } from 'react-redux';
 import { AppState } from '../reducers/index';
 import { Contact } from '../models/Contact';
 import { HomeScreen, StateProps, DispatchProps } from '../components/HomeScreen';
-
 import * as Actions from '../actions/Actions';
+import { isTimestampValid } from '../validation';
 
 const mapStateToProps = (state: AppState, ownProps): StateProps => {
     const OnlineTimestampMillis = 60 * 1000;
     const contacts = state.contacts.toArray();
     const onlineContacts = contacts.filter(contact =>
-        contact.lastSeen > state.currentTimestamp - OnlineTimestampMillis);
-
-    console.log(onlineContacts);
+        contact.lastSeen > state.currentTimestamp - OnlineTimestampMillis
+        &&
+        contact.state === 'contact'
+    );
 
     return {
         contacts: onlineContacts,
         alreadyHasKey: state.user.name !== '',
         user: state.user,
+        contactRandom: state.contactRandom,
     };
 };
-
-const isTimestampValid = (timestamp: number, now: number = Date.now()): boolean => {
-    const TimestampValidityMillis = 60 * 1000;
-    return timestamp + TimestampValidityMillis < now;
-}
 
 const mapDispatchToProps = (dispatch): DispatchProps => {
     return {
@@ -33,11 +30,12 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         },
         onCreateContact: (data: ContactData) => {
             if (isTimestampValid(data.timestamp)) {
-                dispatch(Actions.createContactSendReply(data.publicKey, data.timestamp, data.random));
+                dispatch(Actions.createContact(data.publicKey, '', 'invite-sent'));
+                dispatch(Actions.sendInitiateContact(data.publicKey, data.timestamp, data.random));
             }
         },
         onNotifyContacts: () => {
-            dispatch(Actions.notifyContacts());
+            dispatch(Actions.connectToNetwork());
         },
     };
 };

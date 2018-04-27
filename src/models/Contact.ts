@@ -1,9 +1,10 @@
-import { Id } from './Id';
-
 export type ContactType = 'person' | 'device';
 
-export interface Contact extends Id {
+export type ContactState = 'invite-sent' | 'invite-received' | 'contact';
+
+export interface Contact {
     type: ContactType;
+    state: ContactState;
     name: string;
     publicKey: string;
     knownSince: number;
