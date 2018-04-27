@@ -37,6 +37,9 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         onNotifyContacts: () => {
             dispatch(Actions.connectToNetwork());
         },
+        onSend: (publicKey: string, secret: string) => {
+            dispatch(Actions.sendData(publicKey, secret));
+        },
     };
 };
 

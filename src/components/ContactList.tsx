@@ -24,23 +24,73 @@ import { PrivateIdentity } from '../models/Identity';
 import { User } from '../models/User';
 import { generateRandomString } from '../random';
 import { testUserBob } from '../reducers/index';
+import { SimpleTextInput } from './SimpleTextInput';
 
 const AnimatedList = Animated.createAnimatedComponent(FlatList);
 const PaddingBottom = 60;
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-const QRCodeWidth = 200;
-const QRCodeHeight = 200;
 
-const ContactItem = (props) =>
-    <View style={styles.listItem}>
-        <Text style={styles.listItemTitle}>{props.item.name}</Text>
-        <Text style={styles.listItemSubTitle}>{JSON.stringify(props.item)}</Text>
-        <View style={[styles.itemSeparatorContainer, {width: Width}]}>
-            <View style={styles.horizontalRuler}></View>
-        </View>
-    </View>;
+interface ContactItemProps {
+    isSelected: boolean;
+    item: Contact;
+
+    onSelectContact: (contactPublicKey: string | null) => void;
+    onSend: (publicKey: string, secret: string) => void;
+}
+
+class ContactItem extends React.PureComponent<ContactItemProps> {
+    private textInputValue = '';
+
+    public render() {
+        return (
+            <TouchableView
+                style={styles.listItem}
+                onPress={() => {
+                    console.log('onPress: ', this.props);
+                    this.props.onSelectContact(this.props.isSelected ? null : this.props.item.publicKey);
+                }}
+            >
+                <Text style={styles.listItemTitle}>{this.props.item.name}</Text>
+                <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.item)}</Text>
+                { this.props.isSelected &&
+                    <View style={styles.listItemActionContainer}>
+                        <TouchableView style={styles.listItemActionButton}>
+                            <Ionicon name='ios-attach' size={IconSize.LARGE_LIST_ICON} />
+                        </TouchableView>
+                        <SimpleTextInput
+                            placeholder='Enter your secret here'
+                            style={styles.listItemTextInput}
+                            autoFocus={true}
+                            multiline={true}
+                            numberOfLines={2}
+                            onChangeText={this.onChangeText}
+                        />
+                        <TouchableView
+                            style={styles.listItemActionButton}
+                            onPress={this.onSend}
+                        >
+                            <Ionicon name='ios-send' size={IconSize.LARGE_LIST_ICON} color={Colors.DEFAULT_ACTION_COLOR} />
+                        </TouchableView>
+                    </View>
+                }
+                <View style={[styles.itemSeparatorContainer, {width: Width}]}>
+                    <View style={styles.horizontalRuler}></View>
+                </View>
+            </TouchableView>
+        );
+    }
+
+    private onSend = () => {
+        this.props.onSend(this.props.item.publicKey, this.textInputValue);
+        this.props.onSelectContact(null);
+    }
+
+    private onChangeText = (text: string) => {
+        this.textInputValue = text;
+    }
+}
 
 interface ContactListStateProps {
     contacts: Contact[];
@@ -51,11 +101,20 @@ interface ContactListStateProps {
 interface ContactListDispatchProps {
     onCreateContact: (data: ContactData) => void;
     onNotifyContacts: () => void;
+    onSend: (publicKey: string, secret: string) => void;
 }
 
 type ContactListProps = ContactListStateProps & ContactListDispatchProps;
 
-export class ContactList extends React.PureComponent<ContactListProps> {
+interface ContactListState {
+    selectedContact: string | null;
+}
+
+export class ContactList extends React.PureComponent<ContactListProps, ContactListState> {
+    public state: ContactListState = {
+        selectedContact: null,
+    };
+
     public componentDidMount() {
         this.props.onNotifyContacts();
     }
@@ -88,18 +147,32 @@ export class ContactList extends React.PureComponent<ContactListProps> {
                 (item) => (
                     <ContactItem
                         item={item.item}
+                        isSelected={this.isSelected(item.item)}
+                        onSelectContact={this.onSelectContact}
+                        onSend={this.props.onSend}
                     />
                 )
             }
             keyExtractor={this.keyExtractor}
             keyboardDismissMode='interactive'
+            keyboardShouldPersistTaps='handled'
             maxToRenderPerBatch={15}
             data={this.props.contacts}
         />
     )
 
-    private keyExtractor = (contact: Contact, index: number) => {
+    private keyExtractor = (contact: Contact, index: number): string => {
         return contact.publicKey;
+    }
+
+    private isSelected = (contact: Contact): boolean => {
+        return contact.publicKey === this.state.selectedContact;
+    }
+
+    private onSelectContact = (contactPublicKey: string | null) => {
+        this.setState({
+            selectedContact: contactPublicKey != null ? contactPublicKey : null,
+        });
     }
 }
 
@@ -167,11 +240,24 @@ interface ListHeaderState {
     QRCodeValue: string;
 }
 
+const QRCodeWidth = 160;
+const QRCodeHeight = 160;
+const QRCameraWidth = 200;
+const QRCameraHeight = QRCameraWidth;
+
 class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
     public state: ListHeaderState = {
         headerState: 'default',
         QRCodeValue: '',
     };
+
+    public componentWillMount() {
+        const QRCodeValue = this.generateQRCodeValue();
+        console.log('ListHeader.componentDidMount: ', QRCodeValue)
+        this.setState({
+            QRCodeValue,
+        });
+    }
 
     public render() {
         switch (this.state.headerState) {
@@ -184,12 +270,10 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
     private DefaultListHeader = (props) => (
         <View style={styles.listHeader}>
             <View style={styles.listHeaderButtonContainer}>
-                <TouchableView style={styles.listHeaderLeftButton} onPress={this.onAddContact}>
-                    <Ionicon name='ios-contacts' size={128} color={Colors.DARK_GRAY} />
-                    <Button title='Add contact' onPress={this.onAddContact} color={Colors.DARK_GRAY}/>
-                </TouchableView>
                 <TouchableView style={styles.listHeaderRightButton} onPress={this.onScanCode}>
-                    <MaterialCommunityIcon name='qrcode' size={128} color={Colors.DARK_GRAY} />
+                    <View style={styles.qrCodeContainer}>
+                        <QRCode value={this.state.QRCodeValue} size={QRCodeWidth} color={Colors.DARK_GRAY} />
+                    </View>
                     <Button title='Scan code' onPress={this.onScanCode} color={Colors.DARK_GRAY}/>
                 </TouchableView>
             </View>
@@ -240,16 +324,16 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                 <View style={styles.listHeaderLeftButton}>
                 </View>
 
-                <View style={styles.qrCodeContainer}>
+                <View style={styles.qrCameraContainer}>
                     <QRCodeScanner
                         onRead={this.onScanSuccess}
                         containerStyle={{
-                            width: QRCodeWidth,
-                            height: QRCodeHeight,
+                            width: QRCameraWidth,
+                            height: QRCameraHeight,
                         }}
                         cameraStyle={{
-                            width: QRCodeWidth,
-                            height: QRCodeHeight,
+                            width: QRCameraWidth,
+                            height: QRCameraHeight,
                         }}
                         fadeIn={false}
                     />
@@ -337,6 +421,25 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         paddingLeft: 10,
     },
+    listItemActionContainer: {
+        height: 60,
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        paddingHorizontal: 10,
+        width: '100%',
+    },
+    listItemActionButton: {
+        paddingTop: 8,
+        paddingHorizontal: 3,
+    },
+    listItemTextInput: {
+        marginTop: 2,
+        marginLeft: 5,
+        padding: 3,
+        borderWidth: 1,
+        borderColor: Colors.LIGHT_GRAY,
+        width: '84%',
+    },
     listHeader: {
         height: 200,
         flexDirection: 'column',
@@ -370,8 +473,15 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
     },
     qrCodeContainer: {
+        marginTop: 10,
         width: QRCodeWidth,
         height: QRCodeHeight,
+        padding: 0,
+    },
+    qrCameraContainer: {
+        width: 200,
+        height: 200,
+        padding: 0,
     },
     placeholderContainer: {
         backgroundColor: Colors.WHITE,

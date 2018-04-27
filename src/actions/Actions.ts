@@ -3,7 +3,7 @@ import { NavigationAction } from 'react-navigation';
 
 import { User } from '../models/User';
 import { Contact, ContactState } from '../models/Contact';
-import { connect, sendInitiateContactMessage, sendPingMessage } from '../network/Network';
+import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage } from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
@@ -207,5 +207,14 @@ export const generateContactRandom = () => {
     return async (dispatch, getState: () => AppState) => {
         const random = await generateRandomString(32);
         dispatch(updateContactRandom(random));
+    };
+};
+
+export const sendData = (publicKey: string, data: string) => {
+    return async (dispatch, getState: () => AppState) => {
+        const user = getState().user;
+        const ownPublicKey = user.identity.publicKey;
+        console.log('Sending data', publicKey, data);
+        return sendSecretMessage(publicKey, ownPublicKey, data);
     };
 };
