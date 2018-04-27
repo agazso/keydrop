@@ -17,7 +17,7 @@ import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIc
 import QRCode from 'react-native-qrcode-svg';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 
-import { Contact } from '../models/Contact';
+import { Contact, isContactOnline } from '../models/Contact';
 import { Colors, DefaultFont, IconSize } from '../styles';
 import { TouchableView } from './TouchableView';
 import { PrivateIdentity } from '../models/Identity';
@@ -44,6 +44,11 @@ class ContactItem extends React.PureComponent<ContactItemProps> {
     private textInputValue = '';
 
     public render() {
+        const isOnline = isContactOnline(this.props.item, Date.now());
+        const titleColor = isOnline
+            ? Colors.DARK_GRAY
+            : Colors.LIGHT_GRAY
+            ;
         return (
             <TouchableView
                 style={styles.listItem}
@@ -52,7 +57,10 @@ class ContactItem extends React.PureComponent<ContactItemProps> {
                     this.props.onSelectContact(this.props.isSelected ? null : this.props.item.publicKey);
                 }}
             >
-                <Text style={styles.listItemTitle}>{this.props.item.name}</Text>
+                <View style={styles.listItemTitleContainer}>
+                    { isOnline && <View style={styles.listItemOnlineIndicator}/> }
+                    <Text style={[styles.listItemTitle, {color: titleColor}]}>{this.props.item.name}</Text>
+                </View>
                 <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.item)}</Text>
                 { this.props.isSelected &&
                     <View style={styles.listItemActionContainer}>
@@ -253,7 +261,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
 
     public componentWillMount() {
         const QRCodeValue = this.generateQRCodeValue();
-        console.log('ListHeader.componentDidMount: ', QRCodeValue)
+        console.log('ListHeader.componentDidMount: ', QRCodeValue);
         this.setState({
             QRCodeValue,
         });
@@ -405,6 +413,19 @@ const styles = StyleSheet.create({
         paddingTop: 10,
         paddingBottom: 0,
         marginHorizontal: 0,
+    },
+    listItemTitleContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        width: '100%',
+    },
+    listItemOnlineIndicator: {
+        width: 10,
+        height: 10,
+        borderRadius: 10 / 2,
+        backgroundColor: Colors.IOS_GREEN,
+        marginTop: 15,
+        marginLeft: 14,
     },
     listItemTitle: {
         fontSize: 17,

@@ -10,3 +10,11 @@ export interface Contact {
     knownSince: number;
     lastSeen: number;
 }
+
+const OnlineTimestampMillis = 60 * 1000;
+export const isContactOnline = (contact: Contact, currentTimestamp: number): boolean => {
+    return contact.lastSeen > currentTimestamp - OnlineTimestampMillis
+    &&
+    contact.state === 'contact'
+    ;
+};

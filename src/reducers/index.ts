@@ -6,6 +6,9 @@ import {
     compose,
 } from 'redux';
 import thunkMiddleware from 'redux-thunk';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web and AsyncStorage for react-native
+const immutableTransform = require('redux-persist-transform-immutable');
 
 import { Contact } from '../models/Contact';
 import { User } from '../models/User';
@@ -25,54 +28,6 @@ interface Contacts {
 const now = Date.now();
 const Sec = 1000;
 const defaultContacts = Map<string, Contact>({
-    '0xPKATTILASIPHONE' : {
-        state: 'contact',
-        type: 'device',
-        name: 'Attila\'s iPhone',
-        publicKey: '0xPKATTILASIPHONE',
-        knownSince: 0,
-        lastSeen: 0,
-    },
-    '0xMARK': {
-        state: 'contact',
-        type: 'person',
-        name: 'Mark',
-        publicKey: '0xMARK',
-        knownSince: 0,
-        lastSeen: 0,
-    },
-    '0xDRZOIDBERG': {
-        state: 'contact',
-        type: 'person',
-        name: 'Dr. Zoidberg',
-        publicKey: '0xDRZOIDBERG',
-        knownSince: 0,
-        lastSeen: 0,
-    },
-    '0xBRUCEWAYNE': {
-        state: 'contact',
-        type: 'person',
-        name: 'Bruce Wayne',
-        publicKey: '0xBRUCEWAYNE',
-        knownSince: 0,
-        lastSeen: 0,
-    },
-    '0xELLIOTANDERSON': {
-        state: 'contact',
-        type: 'person',
-        name: 'Elliot Anderson',
-        publicKey: '0xELLIOTANDERSON',
-        knownSince: 0,
-        lastSeen: 0,
-    },
-    '0xMACBOOKPRO': {
-        state: 'contact',
-        type: 'device',
-        name: 'Macbook Pro',
-        publicKey: '0xMACBOOKPRO',
-        knownSince: 0,
-        lastSeen: 0,
-    },
 });
 
 const defaultUser: User = {
@@ -206,14 +161,26 @@ export const reducer = combineReducers<AppState>({
     contactRandom: contactRandomReducer,
 });
 
+const persistConfig = {
+    transforms: [immutableTransform({
+        blacklist: ['currentTimestamp', 'contactRandom'],
+    })],
+    key: 'root',
+    storage,
+};
+
+const persistedReducer = persistReducer(persistConfig, reducer) as any;
+
 export const store = createStore(
-    reducer,
+    persistedReducer,
     defaultState,
     compose(
         applyMiddleware(thunkMiddleware),
     ),
 );
 // store.subscribe(() => console.log(store.getState()));
+
+export const persistor = persistStore(store);
 
 setInterval(() => store.dispatch(timeTick(Date.now()), 1000));
 store.dispatch(generateContactRandom());

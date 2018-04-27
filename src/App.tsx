@@ -3,8 +3,9 @@ import { Provider } from 'react-redux';
 import { StackNavigator, TabNavigator, NavigationRouteConfigMap } from 'react-navigation';
 import { View, Text, StatusBar, Platform, TouchableWithoutFeedback } from 'react-native';
 
-import { store } from './reducers/index';
+import { store, persistor } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
+import { PersistGate } from 'redux-persist/integration/react';
 
 const onPress = () => {
     // TODO scroll to top
@@ -32,7 +33,9 @@ export default class App extends React.Component {
     public render() {
         return (
             <Provider store={store}>
-                <AppNavigator />
+                <PersistGate loading={null} persistor={persistor}>
+                    <AppNavigator />
+                </PersistGate>
             </Provider>
         );
     }

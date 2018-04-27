@@ -1,22 +1,19 @@
 import { connect } from 'react-redux';
 
 import { AppState } from '../reducers/index';
-import { Contact } from '../models/Contact';
+import { Contact, isContactOnline } from '../models/Contact';
 import { HomeScreen, StateProps, DispatchProps } from '../components/HomeScreen';
 import * as Actions from '../actions/Actions';
 import { isTimestampValid } from '../validation';
 
 const mapStateToProps = (state: AppState, ownProps): StateProps => {
-    const OnlineTimestampMillis = 60 * 1000;
     const contacts = state.contacts.toArray();
-    const onlineContacts = contacts.filter(contact =>
-        contact.lastSeen > state.currentTimestamp - OnlineTimestampMillis
-        &&
-        contact.state === 'contact'
-    );
+    const currentTimestamp = state.currentTimestamp;
+    const onlineContacts = contacts.filter(contact => isContactOnline(contact, currentTimestamp));
+    const offlineContacts = contacts.filter(contact => !isContactOnline(contact, currentTimestamp));
 
     return {
-        contacts: onlineContacts,
+        contacts: onlineContacts.concat(offlineContacts),
         alreadyHasKey: state.user.name !== '',
         user: state.user,
         contactRandom: state.contactRandom,
