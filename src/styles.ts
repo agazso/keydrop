@@ -40,7 +40,8 @@ export const IconSize = {
 };
 
 export const HelveticaNeue = 'Helvetica Neue';
-export const DefaultFont = HelveticaNeue;
+export const Roboto = 'Roboto';
+export const DefaultFont = Platform.OS === 'ios' ? HelveticaNeue : Roboto;
 
 export const Header = {
     PADDING: Platform.OS === 'ios' ? 20 : 0,

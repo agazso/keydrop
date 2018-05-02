@@ -214,7 +214,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                     <View style={styles.qrCodeContainer}>
                         <QRCode value={this.state.QRCodeValue} size={QRCodeWidth} color={Colors.DARK_GRAY} />
                     </View>
-                    <Button title='Scan code' onPress={this.onScanCode} color={Colors.DARK_GRAY}/>
+                    <Text style={styles.listHeaderButtonText}>Scan code</Text>
                 </TouchableView>
             </View>
             <View style={styles.listHeaderBottom}>
@@ -346,6 +346,12 @@ const styles = StyleSheet.create({
     listHeaderButtonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
+    },
+    listHeaderButtonText: {
+        textAlign: 'center',
+        color: Colors.DARK_GRAY,
+        fontFamily: DefaultFont,
+        fontSize: 16,
     },
     listHeaderLeftButton: {
         flexDirection: 'column',
