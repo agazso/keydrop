@@ -38,7 +38,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Please let Keydrop access your camera to scan the code</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Please let Keydrop access your camera roll to pick a photo</string>
 	<key>UIAppFonts</key>
