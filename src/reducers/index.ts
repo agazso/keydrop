@@ -10,9 +10,9 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web and AsyncStorage for react-native
 const immutableTransform = require('redux-persist-transform-immutable');
 
-import { Contact } from '../models/Contact';
+import { Contact, isContactPersistent } from '../models/Contact';
 import { User } from '../models/User';
-import { ActionTypes, timeTick, generateContactRandom } from '../actions/Actions';
+import { ActionTypes, timeTick, generateContactRandom, cleanupContacts } from '../actions/Actions';
 
 export interface AppState {
     contacts: Map<string, Contact>;
@@ -81,6 +81,13 @@ const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, actio
                 knownSince: Date.now(),
             };
             return contacts.set(contact.publicKey, contact);
+        }
+        case 'CLEANUP-CONTACTS': {
+            const persistentContacts = contacts
+                .filter(contact => isContactPersistent(contact!))
+                .toMap();
+            console.log('persistentContacts: ', persistentContacts);
+            return persistentContacts;
         }
     }
     return contacts;

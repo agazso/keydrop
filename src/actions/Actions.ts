@@ -17,6 +17,7 @@ export type ActionTypes =
     | UpdateContactLastSeenAction
     | UpdateContactStateAction
     | UpdateContactRandomAction
+    | CleanupContactsAction
     ;
 
 export interface CreateUserAction {
@@ -59,6 +60,10 @@ export interface UpdateContactRandomAction {
     random: string;
 }
 
+export interface CleanupContactsAction {
+    type: 'CLEANUP-CONTACTS';
+}
+
 export const createUser = (name: string): CreateUserAction => ({
     type: 'CREATE-USER',
     name,
@@ -97,6 +102,10 @@ export const updateContactState = (publicKey: string, state: ContactState): Upda
 export const updateContactRandom = (random: string): UpdateContactRandomAction => ({
     type: 'UPDATE-CONTACT-RANDOM',
     random,
+});
+
+export const cleanupContacts = (): CleanupContactsAction => ({
+    type: 'CLEANUP-CONTACTS',
 });
 
 export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
