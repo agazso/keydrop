@@ -18,3 +18,11 @@ export const isContactOnline = (contact: Contact, currentTimestamp: number): boo
     contact.state === 'contact'
     ;
 };
+
+const KnownTimestampMillis = 5 * 60 * 1000;
+export const isContactPersistent = (contact: Contact, currentTimestamp: number = Date.now()): boolean => {
+    if (contact.state === 'contact') {
+        return true;
+    }
+    return false;
+};
