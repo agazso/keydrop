@@ -2,21 +2,11 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { StackNavigator, TabNavigator, NavigationRouteConfigMap } from 'react-navigation';
 import { View, Text, StatusBar, Platform, TouchableWithoutFeedback } from 'react-native';
+import { PersistGate } from 'redux-persist/integration/react';
 
 import { store, persistor } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
-import { PersistGate } from 'redux-persist/integration/react';
-
-const onPress = () => {
-    // TODO scroll to top
-};
-
-const HeaderTitleComponent = (props) =>
-    <TouchableWithoutFeedback onPress={onPress}>
-        <View>
-            <Text>Keydrop</Text>
-        </View>
-    </TouchableWithoutFeedback>;
+import { HeaderTitleComponent } from './components/HeaderTitleComponent';
 
 const AppNavigator = StackNavigator(
     {
