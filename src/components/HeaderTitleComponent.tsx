@@ -11,13 +11,25 @@ const onPress = () => {
 
 const SettingsIconName = Platform.OS === 'ios' ? 'ios-settings' : 'md-settings';
 
-export const HeaderTitleComponent = (props) =>
+export interface StateProps {
+}
+
+export interface DispatchProps {
+    onPressSettings: () => void;
+}
+
+type Props = StateProps & DispatchProps;
+
+export const HeaderTitleComponent = (props: Props) =>
     <TouchableView onPress={onPress} style={styles.headerContainer}>
         <View/>
         <View>
             <Text style={styles.titleText}>Keydrop</Text>
         </View>
-        <TouchableView style={styles.settingsIconContainer}>
+        <TouchableView
+            style={styles.settingsIconContainer}
+            onPress={props.onPressSettings}
+        >
             <Ionicon name={SettingsIconName} color={Colors.DARK_GRAY} size={IconSize.MEDIUM_LIST_ICON} />
         </TouchableView>
     </TouchableView>;

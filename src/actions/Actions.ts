@@ -11,6 +11,7 @@ import { Message, MessageEnvelope } from '../network/Message';
 
 export type ActionTypes =
     | CreateUserAction
+    | DeleteUserAction
     | TimeTickAction
     | CreateContactAction
     | UpdateContactNameAction
@@ -18,11 +19,16 @@ export type ActionTypes =
     | UpdateContactStateAction
     | UpdateContactRandomAction
     | CleanupContactsAction
+    | DeleteContactsAction
     ;
 
 export interface CreateUserAction {
     type: 'CREATE-USER';
     name: string;
+}
+
+export interface DeleteUserAction {
+    type: 'DELETE-USER';
 }
 
 export interface TimeTickAction {
@@ -64,9 +70,17 @@ export interface CleanupContactsAction {
     type: 'CLEANUP-CONTACTS';
 }
 
+export interface DeleteContactsAction {
+    type: 'DELETE-CONTACTS';
+}
+
 export const createUser = (name: string): CreateUserAction => ({
     type: 'CREATE-USER',
     name,
+});
+
+export const deleteUser = (): DeleteUserAction => ({
+    type: 'DELETE-USER',
 });
 
 export const timeTick = (currentTimestamp: number): TimeTickAction => ({
@@ -106,6 +120,10 @@ export const updateContactRandom = (random: string): UpdateContactRandomAction =
 
 export const cleanupContacts = (): CleanupContactsAction => ({
     type: 'CLEANUP-CONTACTS',
+});
+
+export const deleteContacts = (): DeleteContactsAction => ({
+    type: 'DELETE-CONTACTS',
 });
 
 export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {

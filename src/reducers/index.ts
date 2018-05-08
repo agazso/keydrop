@@ -89,6 +89,9 @@ const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, actio
             console.log('persistentContacts: ', persistentContacts);
             return persistentContacts;
         }
+        case 'DELETE-CONTACTS': {
+            return defaultContacts;
+        }
     }
     return contacts;
 };
@@ -138,6 +141,9 @@ const userReducer = (user: User = defaultUser, action: ActionTypes): User => {
                     privateKey: '0xc685320e66ad6cdff4ecd5dc842fb24812e2c6dd87558cd28c48d7f1280bd085',
                 },
             };
+        }
+        case 'DELETE-USER': {
+            return defaultUser;
         }
     }
     return user;

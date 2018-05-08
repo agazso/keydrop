@@ -6,7 +6,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 import { store, persistor } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
-import { HeaderTitleComponent } from './components/HeaderTitleComponent';
+import { HeaderTitleContainer } from './containers/HeaderTitleContainer';
 
 const AppNavigator = StackNavigator(
     {
@@ -14,7 +14,7 @@ const AppNavigator = StackNavigator(
     },
     {
         navigationOptions: {
-            headerTitle: <HeaderTitleComponent/>,
+            headerTitle: <HeaderTitleContainer/>,
         },
     },
 );
