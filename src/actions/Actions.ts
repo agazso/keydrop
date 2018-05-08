@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, AlertButton, Clipboard } from 'react-native';
 import { NavigationAction } from 'react-navigation';
 
 import { User } from '../models/User';
@@ -173,7 +173,17 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 return;
             }
             case 'secret': {
-                Alert.alert('Secret arrived', message.message);
+                const buttons: AlertButton[] = [
+                    {
+                        text: 'Copy',
+                        onPress: () => Clipboard.setString(message.message),
+                    },
+                    {
+                        text: 'Cancel',
+                        style: 'cancel',
+                    },
+                ];
+                Alert.alert('Secret arrived', 'Copy to clipboard', buttons);
                 return;
             }
         }
