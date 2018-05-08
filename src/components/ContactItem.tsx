@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform, Clipboard } from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
 import { Colors, IconSize, DefaultFont } from '../styles';
@@ -14,6 +14,8 @@ interface ContactItemProps {
     onSelectContact: (contactPublicKey: string | null) => void;
     onSend: (publicKey: string, secret: string) => void;
 }
+
+const CopyIconName = Platform.OS === 'ios' ? 'ios-copy-outline' : 'md-copy';
 
 export class ContactItem extends React.PureComponent<ContactItemProps> {
     private textInputValue = '';
@@ -33,31 +35,17 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
                 }}
             >
                 <View style={styles.listItemTitleContainer}>
-                    { isOnline && <View style={styles.listItemOnlineIndicator}/> }
-                    <Text style={[styles.listItemTitle, {color: titleColor}]}>{this.props.item.name}</Text>
-                </View>
-                <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.item)}</Text>
-                { this.props.isSelected &&
-                    <View style={styles.listItemActionContainer}>
-                        <TouchableView style={styles.listItemActionButton}>
-                            <Ionicon name='ios-attach' size={IconSize.LARGE_LIST_ICON} />
-                        </TouchableView>
-                        <SimpleTextInput
-                            placeholder='Enter your secret here'
-                            style={styles.listItemTextInput}
-                            autoFocus={true}
-                            multiline={true}
-                            numberOfLines={2}
-                            onChangeText={this.onChangeText}
-                        />
-                        <TouchableView
-                            style={styles.listItemActionButton}
-                            onPress={this.onSend}
-                        >
-                            <Ionicon name='ios-send' size={IconSize.LARGE_LIST_ICON} color={Colors.DEFAULT_ACTION_COLOR} />
+                    <View style={styles.listItemTitleLeftContainer}>
+                        { isOnline && <View style={styles.listItemOnlineIndicator}/> }
+                        <Text style={[styles.listItemTitle, {color: titleColor}]}>{this.props.item.name}</Text>
+                    </View>
+                    <View style={styles.listItemTitleRightContainer}>
+                        <TouchableView onPress={this.onSend}>
+                            <Text style={styles.listItemSendText}>Send clipboard</Text>
                         </TouchableView>
                     </View>
-                }
+                </View>
+                <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.item)}</Text>
                 <View style={styles.listItemSeparatorContainer}>
                     <View style={styles.horizontalRuler}></View>
                 </View>
@@ -65,8 +53,9 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
         );
     }
 
-    private onSend = () => {
-        this.props.onSend(this.props.item.publicKey, this.textInputValue);
+    private onSend = async () => {
+        const data = await Clipboard.getString();
+        this.props.onSend(this.props.item.publicKey, data);
         this.props.onSelectContact(null);
     }
 
@@ -87,15 +76,25 @@ const styles = StyleSheet.create({
     },
     listItemTitleContainer: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
         width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    listItemTitleLeftContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    listItemTitleRightContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
     },
     listItemOnlineIndicator: {
         width: 10,
         height: 10,
         borderRadius: 10 / 2,
         backgroundColor: Colors.IOS_GREEN,
-        marginTop: 15,
         marginLeft: 14,
     },
     listItemTitle: {
@@ -105,6 +104,12 @@ const styles = StyleSheet.create({
         fontFamily: DefaultFont,
         paddingVertical: 10,
         paddingLeft: 10,
+    },
+    listItemSendText: {
+        borderColor: Colors.LIGHT_GRAY,
+        borderWidth: 0.5,
+        padding: 3,
+        marginRight: 10,
     },
     listItemSubTitle: {
         fontSize: 12,
