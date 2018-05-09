@@ -39,11 +39,7 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
                         { isOnline && <View style={styles.listItemOnlineIndicator}/> }
                         <Text style={[styles.listItemTitle, {color: titleColor}]}>{this.props.item.name}</Text>
                     </View>
-                    <View style={styles.listItemTitleRightContainer}>
-                        <TouchableView onPress={this.onSend}>
-                            <Text style={styles.listItemSendText}>Send clipboard</Text>
-                        </TouchableView>
-                    </View>
+                    <this.ListItemTitleRightContainer />
                 </View>
                 <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.item)}</Text>
                 <View style={styles.listItemSeparatorContainer}>
@@ -51,6 +47,17 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
                 </View>
             </TouchableView>
         );
+    }
+
+    private ListItemTitleRightContainer = (props) => {
+        return isContactOnline(this.props.item)
+        ?
+            <View style={styles.listItemTitleRightContainer}>
+                <TouchableView onPress={this.onSend}>
+                    <Text style={styles.listItemSendText}>Send clipboard</Text>
+                </TouchableView>
+            </View>
+        : null;
     }
 
     private onSend = async () => {
@@ -108,8 +115,10 @@ const styles = StyleSheet.create({
     listItemSendText: {
         borderColor: Colors.LIGHT_GRAY,
         borderWidth: 0.5,
-        padding: 3,
+        borderRadius: 3,
+        padding: 5,
         marginRight: 10,
+        color: Colors.DEFAULT_ACTION_COLOR,
     },
     listItemSubTitle: {
         fontSize: 12,
