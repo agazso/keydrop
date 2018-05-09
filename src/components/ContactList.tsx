@@ -86,7 +86,7 @@ export class ContactList extends React.PureComponent<ContactListProps, ContactLi
             renderItem={
                 (item) => (
                     <ContactItem
-                        item={item.item}
+                        contact={item.item}
                         isSelected={this.isSelected(item.item)}
                         onSelectContact={this.onSelectContact}
                         onSend={this.props.onSend}
@@ -102,7 +102,8 @@ export class ContactList extends React.PureComponent<ContactListProps, ContactLi
     )
 
     private keyExtractor = (contact: Contact, index: number): string => {
-        return contact.publicKey + '/' + contact.lastSeen;
+        const state = isContactOnline(contact) ? 'online' : 'offline';
+        return contact.publicKey + '/' + contact.lastSeen + '/' + state;
     }
 
     private isSelected = (contact: Contact): boolean => {

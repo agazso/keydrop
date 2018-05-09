@@ -9,7 +9,7 @@ import { SimpleTextInput } from './SimpleTextInput';
 
 interface ContactItemProps {
     isSelected: boolean;
-    item: Contact;
+    contact: Contact;
 
     onSelectContact: (contactPublicKey: string | null) => void;
     onSend: (publicKey: string, secret: string) => void;
@@ -21,7 +21,7 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
     private textInputValue = '';
 
     public render() {
-        const isOnline = isContactOnline(this.props.item, Date.now());
+        const isOnline = isContactOnline(this.props.contact, Date.now());
         const titleColor = isOnline
             ? Colors.DARK_GRAY
             : Colors.LIGHT_GRAY
@@ -31,17 +31,17 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
                 style={styles.listItem}
                 onPress={() => {
                     console.log('onPress: ', this.props);
-                    this.props.onSelectContact(this.props.isSelected ? null : this.props.item.publicKey);
+                    this.props.onSelectContact(this.props.isSelected ? null : this.props.contact.publicKey);
                 }}
             >
                 <View style={styles.listItemTitleContainer}>
                     <View style={styles.listItemTitleLeftContainer}>
                         { isOnline && <View style={styles.listItemOnlineIndicator}/> }
-                        <Text style={[styles.listItemTitle, {color: titleColor}]}>{this.props.item.name}</Text>
+                        <Text style={[styles.listItemTitle, {color: titleColor}]}>{this.props.contact.name}</Text>
                     </View>
-                    <this.ListItemTitleRightContainer />
+                    { isOnline && <this.ListItemTitleRightContainer /> }
                 </View>
-                <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.item)}</Text>
+                <Text style={styles.listItemSubTitle}>{JSON.stringify(this.props.contact)}</Text>
                 <View style={styles.listItemSeparatorContainer}>
                     <View style={styles.horizontalRuler}></View>
                 </View>
@@ -49,20 +49,17 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
         );
     }
 
-    private ListItemTitleRightContainer = (props) => {
-        return isContactOnline(this.props.item)
-        ?
-            <View style={styles.listItemTitleRightContainer}>
-                <TouchableView onPress={this.onSend}>
-                    <Text style={styles.listItemSendText}>Send clipboard</Text>
-                </TouchableView>
-            </View>
-        : null;
-    }
+    private ListItemTitleRightContainer = (props) => (
+        <View style={styles.listItemTitleRightContainer}>
+            <TouchableView onPress={this.onSend}>
+                <Text style={styles.listItemSendText}>Send clipboard</Text>
+            </TouchableView>
+        </View>
+    )
 
     private onSend = async () => {
         const data = await Clipboard.getString();
-        this.props.onSend(this.props.item.publicKey, data);
+        this.props.onSend(this.props.contact.publicKey, data);
         this.props.onSelectContact(null);
     }
 
