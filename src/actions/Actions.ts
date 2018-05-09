@@ -1,5 +1,4 @@
 import { Alert, AlertButton, Clipboard } from 'react-native';
-import { NavigationAction } from 'react-navigation';
 import { Map } from 'immutable';
 
 import { User } from '../models/User';
