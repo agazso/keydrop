@@ -33,7 +33,6 @@ export interface DeleteUserAction {
 
 export interface TimeTickAction {
     type: 'TIME-TICK';
-    currentTimestamp: number;
 }
 
 export interface CreateContactAction {
