@@ -1,7 +1,7 @@
 import { encryptWithPublicKey, encryptSym } from '../crypto';
 import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMessage } from './Message';
 
-//const serverAddress = '192.168.56.1:8080';
+// const serverAddress = '192.168.56.1:8080';
 const serverAddress = 'keydrop.helmethair.co';
 
 const apiSend = (address: string, message: string): Promise<void> => {
@@ -15,7 +15,11 @@ const apiSend = (address: string, message: string): Promise<void> => {
         payload: message,
     };
     return new Promise((resolve, reject) => {
-        webSocket!.send(JSON.stringify(envelope));
+        try {
+            webSocket!.send(JSON.stringify(envelope));
+        } catch (e) {
+            console.log(e);
+        }
         resolve();
     });
 };
