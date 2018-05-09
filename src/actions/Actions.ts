@@ -1,5 +1,6 @@
 import { Alert, AlertButton, Clipboard } from 'react-native';
 import { NavigationAction } from 'react-navigation';
+import { Map } from 'immutable';
 
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
@@ -8,6 +9,7 @@ import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
+import { encryptWithPublicKey } from '../crypto';
 
 export type ActionTypes =
     | CreateUserAction
@@ -174,21 +176,49 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 return;
             }
             case 'secret': {
+                const contactName = getContactName(state.contacts, message.publicKey);
                 const buttons: AlertButton[] = [
                     {
                         text: 'Copy',
                         onPress: () => Clipboard.setString(message.message),
                     },
                     {
+                        text: 'Show',
+                        onPress: () => showSecretDialog(message.message),
+                    },
+                    {
                         text: 'Cancel',
                         style: 'cancel',
                     },
                 ];
-                Alert.alert('Secret arrived', 'Copy to clipboard', buttons);
+                const from = contactName === '' ? '' : ' from ' + contactName;
+                Alert.alert('Secret arrived' + from, 'Copy to clipboard or show', buttons);
                 return;
             }
         }
     };
+};
+
+const getContactName = (contacts: Map<string, Contact>, publicKey: string): string => {
+    if (contacts.has(publicKey)) {
+        return contacts.get(publicKey)!.name;
+    }
+    return '';
+};
+
+const showSecretDialog = (secret: string) => {
+    const buttons: AlertButton[] = [
+        {
+            text: 'Copy',
+            onPress: () => Clipboard.setString(secret),
+        },
+        {
+            text: 'Cancel',
+            style: 'cancel',
+        },
+    ];
+    Alert.alert('Secret is: ' + secret, 'Copy to clipboard', buttons);
+    return;
 };
 
 export const connectToNetwork = () => {
