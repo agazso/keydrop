@@ -2,7 +2,7 @@ import { Alert, AlertButton, Clipboard } from 'react-native';
 import { NavigationAction } from 'react-navigation';
 
 import { User } from '../models/User';
-import { Contact, ContactState } from '../models/Contact';
+import { Contact, ContactState, isContactOnline } from '../models/Contact';
 import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage } from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
@@ -133,6 +133,9 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 const contacts = state.contacts;
                 if (contacts.has(message.publicKey)) {
                     const contact = contacts.get(message.publicKey);
+                    if (!isContactOnline(contact)) {
+                        dispatch(pingContact(contact.publicKey));
+                    }
                     dispatch(updateContactLastSeen(contact.publicKey, Date.now()));
                     if (contact.state === 'invite-received') {
                         dispatch(updateContactState(contact.publicKey, 'contact'));
