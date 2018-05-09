@@ -152,7 +152,7 @@ const userReducer = (user: User = defaultUser, action: ActionTypes): User => {
 const currentTimestampReducer = (currentTimestamp: number = Date.now(), action: ActionTypes): number => {
     switch (action.type) {
         case 'TIME-TICK': {
-            return action.currentTimestamp;
+            return Date.now();
         }
     }
     return currentTimestamp;
@@ -195,5 +195,5 @@ export const store = createStore(
 
 export const persistor = persistStore(store);
 
-setInterval(() => store.dispatch(timeTick(Date.now()), 1000));
+setInterval(() => store.dispatch(timeTick(), 1000));
 store.dispatch(generateContactRandom());

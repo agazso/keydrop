@@ -83,9 +83,8 @@ export const deleteUser = (): DeleteUserAction => ({
     type: 'DELETE-USER',
 });
 
-export const timeTick = (currentTimestamp: number): TimeTickAction => ({
+export const timeTick = (): TimeTickAction => ({
     type: 'TIME-TICK',
-    currentTimestamp,
 });
 
 export const createContact = (publicKey: string, name: string, state: ContactState): CreateContactAction => ({
