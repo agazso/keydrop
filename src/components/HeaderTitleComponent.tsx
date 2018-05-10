@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 40,
         alignItems: 'center',
+        paddingTop: 20,
     },
     settingsIconContainer: {
         width: 30,
