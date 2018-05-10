@@ -9,9 +9,10 @@ import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
 import { encryptWithPublicKey } from '../crypto';
+import { PrivateIdentity } from '../models/Identity';
 
 export type ActionTypes =
-    | CreateUserAction
+    | CreateUserWithIdentityAction
     | DeleteUserAction
     | TimeTickAction
     | CreateContactAction
@@ -23,9 +24,10 @@ export type ActionTypes =
     | DeleteContactsAction
     ;
 
-export interface CreateUserAction {
-    type: 'CREATE-USER';
+export interface CreateUserWithIdentityAction {
+    type: 'CREATE-USER-WITH-IDENTITY';
     name: string;
+    identity: PrivateIdentity;
 }
 
 export interface DeleteUserAction {
@@ -74,9 +76,10 @@ export interface DeleteContactsAction {
     type: 'DELETE-CONTACTS';
 }
 
-export const createUser = (name: string): CreateUserAction => ({
-    type: 'CREATE-USER',
+export const createUserWithIdentity = (name: string, identity: PrivateIdentity): CreateUserWithIdentityAction => ({
+    type: 'CREATE-USER-WITH-IDENTITY',
     name,
+    identity,
 });
 
 export const deleteUser = (): DeleteUserAction => ({
@@ -124,6 +127,16 @@ export const cleanupContacts = (): CleanupContactsAction => ({
 export const deleteContacts = (): DeleteContactsAction => ({
     type: 'DELETE-CONTACTS',
 });
+
+export const createUser = (name: string) => {
+    return async (dispatch, getState: () => AppState) => {
+        const identity: PrivateIdentity = {
+            publicKey: await generateRandomString(32),
+            privateKey: await generateRandomString(32),
+        };
+        dispatch(createUserWithIdentity(name, identity));
+    };
+};
 
 export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
     return async (dispatch, getState: () => AppState) => {
