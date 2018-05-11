@@ -10,6 +10,7 @@ import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
 import { encryptWithPublicKey } from '../crypto';
 import { PrivateIdentity } from '../models/Identity';
+import { createIdentity } from '../Swarm';
 
 export type ActionTypes =
     | CreateUserWithIdentityAction
@@ -143,10 +144,7 @@ export const deleteContacts = (): DeleteContactsAction => ({
 
 export const createUser = (name: string) => {
     return async (dispatch, getState: () => AppState) => {
-        const identity: PrivateIdentity = {
-            publicKey: await generateRandomString(32),
-            privateKey: await generateRandomString(32),
-        };
+        const identity: PrivateIdentity = await createIdentity();
         dispatch(createUserWithIdentity(name, identity));
     };
 };

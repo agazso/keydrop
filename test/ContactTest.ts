@@ -8,6 +8,7 @@ it('should test if contact is persistent', () => {
         publicKey: '0xPUBKEY',
         knownSince: 0,
         lastSeen: 0,
+        lastTransferStarted: 0,
     };
 
     const result = isContactPersistent(contact);
@@ -22,6 +23,7 @@ it('should test if contact is not persistent', () => {
         publicKey: '0xPUBKEY',
         knownSince: 0,
         lastSeen: 0,
+        lastTransferStarted: 0,
     };
 
     const result = isContactPersistent(contact);
