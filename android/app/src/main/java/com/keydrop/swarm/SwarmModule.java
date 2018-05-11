@@ -6,8 +6,11 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
 import com.github.helmethair_co.keydrop_go.Keydropgo;
 import android.content.ContextWrapper;
+import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -27,5 +30,22 @@ public class SwarmModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void show(String message, Promise promise) {
         promise.resolve(message + " " + Keydropgo.StartNode(this.reactContext.getFilesDir().getAbsolutePath()));
+    }
+
+    @ReactMethod
+    public void createIdentity(Promise promise) {
+        final String identityJson = Keydropgo.CreateIdentity();
+        try {
+            final JSONObject jsonObject = new JSONObject(identityJson);
+
+            WritableMap identity = new WritableNativeMap();
+            identity.putString("publicKey", jsonObject.getString("publicKey"));
+            identity.putString("privateKey", jsonObject.getString("privateKey"));
+            identity.putString("address", jsonObject.getString("address"));
+
+            promise.resolve(identity);
+        } catch (Exception e) {
+            promise.resolve(e.toString());
+        }
     }
 }

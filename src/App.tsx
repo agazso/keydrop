@@ -24,6 +24,9 @@ NativeModules.Swarm.show("yolóka")
      //   ws.send(JSON.stringify(json));
     });
 
+NativeModules.Swarm.createIdentity()
+    .then(value => console.log(value));
+
 export default class App extends React.Component {
     public render() {
         return (
