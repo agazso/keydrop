@@ -43,6 +43,7 @@ export interface TimeTickAction {
 export interface CreateContactAction {
     type: 'CREATE-CONTACT';
     publicKey: string;
+    address: string;
     name: string;
     state: ContactState;
 }
@@ -98,9 +99,10 @@ export const timeTick = (): TimeTickAction => ({
     type: 'TIME-TICK',
 });
 
-export const createContact = (publicKey: string, name: string, state: ContactState): CreateContactAction => ({
+export const createContact = (publicKey: string, address: string, name: string, state: ContactState): CreateContactAction => ({
     type: 'CREATE-CONTACT',
     publicKey,
+    address,
     name,
     state,
 });
@@ -194,7 +196,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                     return;
                 }
 
-                dispatch(createContact(message.publicKey, message.name, 'invite-received'));
+                dispatch(createContact(message.publicKey, message.address, message.name, 'invite-received'));
                 dispatch(sendInitiateContact(message.publicKey, message.timestamp, message.random));
                 return;
             }

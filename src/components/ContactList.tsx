@@ -227,6 +227,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
     private generateQRCodeValue = () => {
         const data: ContactData = {
             publicKey: this.props.user.identity.publicKey,
+            address: this.props.user.identity.address,
             timestamp: Date.now(),
             random: this.props.contactRandom,
         };
