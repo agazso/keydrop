@@ -4,6 +4,7 @@ export interface MessageBase {
 
 export interface InitiateContactMessage extends MessageBase {
     type: 'initiate-contact';
+    address: string;
     timestamp: number;
     random: string;
     name: string;
