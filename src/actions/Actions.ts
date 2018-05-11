@@ -259,7 +259,7 @@ export const connectToNetwork = () => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
-        connect(ownPublicKey, {
+       /* connect(ownPublicKey, {
             onOpen: () => {
                 dispatch(pingSelf());
                 dispatch(pingContacts());
@@ -267,7 +267,7 @@ export const connectToNetwork = () => {
             onMessage: (envelope: MessageEnvelope) => {
                 dispatch(receiveMessageEnvelope(envelope));
             },
-        });
+        });*/
     };
 };
 
