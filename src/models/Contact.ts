@@ -9,6 +9,7 @@ export interface Contact {
     publicKey: string;
     knownSince: number;
     lastSeen: number;
+    lastTransferStarted: number;
 }
 
 const OnlineTimestampMillis = 60 * 1000;
@@ -25,4 +26,9 @@ export const isContactPersistent = (contact: Contact, currentTimestamp: number =
         return true;
     }
     return false;
+};
+
+const ActiveTransferTimestampMillis = 60 * 1000;
+export const hasContactActiveTransfer = (contact: Contact, currentTimestamp: number = Date.now()): boolean => {
+    return contact.lastTransferStarted > currentTimestamp - ActiveTransferTimestampMillis;
 };

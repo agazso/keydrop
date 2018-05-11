@@ -3,7 +3,7 @@ import { Map } from 'immutable';
 
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
-import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage } from '../network/Network';
+import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage, sendAckSendMessage } from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
@@ -19,6 +19,7 @@ export type ActionTypes =
     | UpdateContactNameAction
     | UpdateContactLastSeenAction
     | UpdateContactStateAction
+    | UpdateContactLastTransferStartedAction
     | UpdateContactRandomAction
     | CleanupContactsAction
     | DeleteContactsAction
@@ -61,6 +62,12 @@ export interface UpdateContactStateAction {
     type: 'UPDATE-CONTACT-STATE';
     publicKey: string;
     state: ContactState;
+}
+
+export interface UpdateContactLastTransferStartedAction {
+    type: 'UPDATE-CONTACT-LAST-TRANSFER-STARTED';
+    publicKey: string;
+    lastTransferStarted: number;
 }
 
 export interface UpdateContactRandomAction {
@@ -115,6 +122,12 @@ export const updateContactState = (publicKey: string, state: ContactState): Upda
     state,
 });
 
+export const updateContactLastTransferStarted = (publicKey: string, lastTransferStarted: number): UpdateContactLastTransferStartedAction => ({
+    type: 'UPDATE-CONTACT-LAST-TRANSFER-STARTED',
+    publicKey,
+    lastTransferStarted,
+});
+
 export const updateContactRandom = (random: string): UpdateContactRandomAction => ({
     type: 'UPDATE-CONTACT-RANDOM',
     random,
@@ -140,7 +153,7 @@ export const createUser = (name: string) => {
 
 export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
     return async (dispatch, getState: () => AppState) => {
-        const message = JSON.parse(envelope.payload);
+        const message = JSON.parse(envelope.payload) as Message;
         const state = getState();
         switch (message.type) {
             case 'ping': {
@@ -188,6 +201,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 return;
             }
             case 'secret': {
+                await sendAckSendMessage(message.publicKey, state.user.identity.publicKey, message.id);
                 const contactName = getContactName(state.contacts, message.publicKey);
                 const buttons: AlertButton[] = [
                     {
@@ -205,6 +219,14 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 ];
                 const from = contactName === '' ? '' : ' from ' + contactName;
                 Alert.alert('Secret arrived' + from, 'Copy to clipboard or show', buttons);
+                return;
+            }
+            case 'ack-send': {
+                const contacts = state.contacts;
+                if (contacts.has(message.publicKey)) {
+                    const contact = contacts.get(message.publicKey)!;
+                    dispatch(updateContactLastTransferStarted(contact.publicKey, 0));
+                }
                 return;
             }
         }
@@ -304,6 +326,7 @@ export const sendData = (publicKey: string, data: string) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
         console.log('Sending data', publicKey, data);
-        return sendSecretMessage(publicKey, ownPublicKey, data);
+        await sendSecretMessage(publicKey, ownPublicKey, data);
+        dispatch(updateContactLastTransferStarted(publicKey, Date.now()));
     };
 };

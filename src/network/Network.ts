@@ -1,5 +1,5 @@
 import { encryptWithPublicKey, encryptSym } from '../crypto';
-import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMessage } from './Message';
+import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMessage, AckSendMessage } from './Message';
 
 // const serverAddress = '192.168.56.1:8080';
 const serverAddress = 'keydrop.helmethair.co';
@@ -52,6 +52,16 @@ export const sendSecretMessage = (recipientPublicKey: string, ownPublicKey: stri
         type: 'secret',
         publicKey: ownPublicKey,
         message: secret,
+        id: recipientPublicKey,
+    };
+    return sendAsymEncryptedMessage(recipientPublicKey, messageToString(message));
+};
+
+export const sendAckSendMessage = (recipientPublicKey: string, ownPublicKey: string, id: string): Promise<void> => {
+    const message: AckSendMessage = {
+        type: 'ack-send',
+        publicKey: ownPublicKey,
+        id,
     };
     return sendAsymEncryptedMessage(recipientPublicKey, messageToString(message));
 };

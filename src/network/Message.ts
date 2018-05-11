@@ -12,16 +12,23 @@ export interface InitiateContactMessage extends MessageBase {
 export interface SecretMessage extends MessageBase {
     type: 'secret';
     message: string;
+    id: string;
 }
 
 export interface PingMessage extends MessageBase {
     type: 'ping';
 }
 
+export interface AckSendMessage extends MessageBase {
+    type: 'ack-send';
+    id: string;
+}
+
 export type Message =
     | InitiateContactMessage
     | SecretMessage
     | PingMessage
+    | AckSendMessage
     ;
 
 export interface MessageEnvelope {

@@ -12,7 +12,14 @@ const immutableTransform = require('redux-persist-transform-immutable');
 
 import { Contact, isContactPersistent } from '../models/Contact';
 import { User } from '../models/User';
-import { ActionTypes, timeTick, generateContactRandom, cleanupContacts } from '../actions/Actions';
+import {
+    ActionTypes,
+    timeTick,
+    generateContactRandom,
+    cleanupContacts,
+    updateContactLastSeen,
+    pingContacts,
+} from '../actions/Actions';
 import { generateRandomString } from '../random';
 
 export interface AppState {
@@ -72,6 +79,14 @@ const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, actio
             };
             return contacts.set(updatedContact.publicKey, updatedContact);
         }
+        case 'UPDATE-CONTACT-LAST-TRANSFER-STARTED': {
+            const contact = contacts.get(action.publicKey);
+            const updatedContact = {
+                ...contact,
+                lastTransferStarted: action.lastTransferStarted,
+            };
+            return contacts.set(updatedContact.publicKey, updatedContact);
+        }
         case 'CREATE-CONTACT': {
             const contact: Contact = {
                 type: 'person',
@@ -80,12 +95,19 @@ const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, actio
                 publicKey: action.publicKey,
                 lastSeen: Date.now(),
                 knownSince: Date.now(),
+                lastTransferStarted: 0,
             };
             return contacts.set(contact.publicKey, contact);
         }
         case 'CLEANUP-CONTACTS': {
             const persistentContacts = contacts
                 .filter(contact => isContactPersistent(contact!))
+                .map(contact => {
+                    return {
+                        ...contact!,
+                        lastTransferStarted: 0,
+                    };
+                })
                 .toMap();
             console.log('persistentContacts: ', persistentContacts);
             return persistentContacts;
@@ -198,4 +220,5 @@ export const store = createStore(
 export const persistor = persistStore(store);
 
 setInterval(() => store.dispatch(timeTick()), 1000);
+setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
 store.dispatch(generateContactRandom());

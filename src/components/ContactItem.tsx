@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, Platform, Clipboard } from 'react-native';
+import { View, Text, StyleSheet, Platform, Clipboard, ActivityIndicator } from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
 import { Colors, IconSize, DefaultFont } from '../styles';
-import { Contact, isContactOnline } from '../models/Contact';
+import { Contact, isContactOnline, hasContactActiveTransfer } from '../models/Contact';
 import { TouchableView } from './TouchableView';
 import { SimpleTextInput } from './SimpleTextInput';
 
@@ -51,9 +51,16 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
 
     private ListItemTitleRightContainer = (props) => (
         <View style={styles.listItemTitleRightContainer}>
-            <TouchableView onPress={this.onSend}>
-                <Text style={styles.listItemSendText}>Send clipboard</Text>
-            </TouchableView>
+            { hasContactActiveTransfer(this.props.contact)
+            ?
+                <View style={styles.listItemProgressIndicator}>
+                    <ActivityIndicator size='small' color={Colors.DARK_GRAY} />
+                </View>
+            :
+                <TouchableView onPress={this.onSend}>
+                    <Text style={styles.listItemSendText}>Send clipboard</Text>
+                </TouchableView>
+            }
         </View>
     )
 
@@ -116,6 +123,9 @@ const styles = StyleSheet.create({
         padding: 5,
         marginRight: 10,
         color: Colors.DEFAULT_ACTION_COLOR,
+    },
+    listItemProgressIndicator: {
+        paddingRight: 20,
     },
     listItemSubTitle: {
         fontSize: 12,
