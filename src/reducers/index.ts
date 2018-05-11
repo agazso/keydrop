@@ -42,7 +42,6 @@ const defaultUser: User = {
     name: '',
     identity: {
         publicKey: '',
-        privateKey: '',
         address: '',
     },
 };
@@ -125,7 +124,7 @@ const testUserAlice: User = {
     name: 'Alice',
     identity: {
         publicKey: 'e8869123ec894bfb8bce8dc3b083ecde6ba16abe3ea7ff2b32ca62eaded164bdf3aae44766c1431477d570378e81cb3fb674ae7dcdcb4257abdd1491f12641b8',
-        privateKey: '0x45e1805a7b6eee384820ac97c90b39c51265ac8e39715fa8d76a4f71fdb90def',
+        // privateKey: '0x45e1805a7b6eee384820ac97c90b39c51265ac8e39715fa8d76a4f71fdb90def',
         address: '0x6d74809A42a20a3695ea5F5585360A60677DFBed',
     },
 };
@@ -134,7 +133,7 @@ export const testUserBob: User = {
     name: 'Bob',
     identity: {
         publicKey: '8a6cf93a2f199009db635a03e4d7b8a2fad4c9044ad237aba723e459b32d362d46b9848fa2525df47a502fe68777ab368e5be85f609b756e28afb8620a5551ba',
-        privateKey: '0xc685320e66ad6cdff4ecd5dc842fb24812e2c6dd87558cd28c48d7f1280bd085',
+        // privateKey: '0xc685320e66ad6cdff4ecd5dc842fb24812e2c6dd87558cd28c48d7f1280bd085',
         address: '0xADc9b12480cE9880D6Bed1Ef91Cdc279D671Cf0d',
     },
 };
@@ -153,7 +152,7 @@ const userReducer = (user: User = defaultUser, action: ActionTypes): User => {
                 name: action.name,
                 identity: {
                     publicKey: action.identity.publicKey,
-                    privateKey: action.identity.privateKey,
+                    // privateKey: action.identity.privateKey,
                     address: action.identity.address,
                 },
             };
