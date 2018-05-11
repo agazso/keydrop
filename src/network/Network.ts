@@ -3,6 +3,7 @@ import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMe
 
 // const serverAddress = '192.168.56.1:8080';
 const serverAddress = 'keydrop.helmethair.co';
+const contactAddresses = {};
 
 const apiSend = (address: string, message: string): Promise<void> => {
     if (webSocket == null) {
@@ -28,6 +29,10 @@ const messageToString = (message: Message): string => {
     return JSON.stringify(message);
 };
 
+export const registerContactAddress = (publicKey: string, address: string) => {
+    contactAddresses[publicKey] = address;
+};
+
 export const sendPingMessage = (recipientPublicKey: string, ownPublicKey: string): Promise<void> => {
     const message: PingMessage = {
         type: 'ping',
@@ -36,10 +41,11 @@ export const sendPingMessage = (recipientPublicKey: string, ownPublicKey: string
     return sendAsymEncryptedMessage(recipientPublicKey, messageToString(message));
 };
 
-export const sendInitiateContactMessage = (recipientPublicKey: string, ownPublicKey: string, timestamp: number, random: string, name: string): Promise<void> => {
+export const sendInitiateContactMessage = (recipientPublicKey: string, ownPublicKey: string, ownAddress: string, timestamp: number, random: string, name: string): Promise<void> => {
     const message: InitiateContactMessage = {
         type: 'initiate-contact',
         publicKey: ownPublicKey,
+        address: ownAddress,
         timestamp,
         random,
         name,

@@ -94,6 +94,7 @@ const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, actio
                 name: action.name,
                 state: action.state,
                 publicKey: action.publicKey,
+                address: action.address,
                 lastSeen: Date.now(),
                 knownSince: Date.now(),
                 lastTransferStarted: 0,

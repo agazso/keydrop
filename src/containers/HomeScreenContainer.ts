@@ -28,7 +28,7 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         onCreateContact: (data: ContactData) => {
             if (isTimestampValid(data.timestamp)) {
                 dispatch(Actions.createContact(data.publicKey, data.address, '', 'invite-sent'));
-                dispatch(Actions.sendInitiateContact(data.publicKey, data.timestamp, data.random));
+                dispatch(Actions.sendInitiateContact(data.publicKey, data.address, data.timestamp, data.random));
             }
         },
         onNotifyContacts: () => {

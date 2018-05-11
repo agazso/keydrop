@@ -3,7 +3,7 @@ import { Map } from 'immutable';
 
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
-import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage, sendAckSendMessage } from '../network/Network';
+import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage, sendAckSendMessage, registerContactAddress } from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
@@ -197,7 +197,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 }
 
                 dispatch(createContact(message.publicKey, message.address, message.name, 'invite-received'));
-                dispatch(sendInitiateContact(message.publicKey, message.timestamp, message.random));
+                dispatch(sendInitiateContact(message.publicKey, message.address, message.timestamp, message.random));
                 return;
             }
             case 'secret': {
@@ -271,13 +271,16 @@ export const connectToNetwork = () => {
     };
 };
 
-export const sendInitiateContact = (publicKey: string, timestamp: number, random: string) => {
+export const sendInitiateContact = (publicKey: string, address: string, timestamp: number, random: string) => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
+        const ownAddress = user.identity.address;
+        registerContactAddress(publicKey, address);
         return sendInitiateContactMessage(
                 publicKey,
                 ownPublicKey,
+                ownAddress,
                 timestamp,
                 random,
                 user.name,
@@ -291,7 +294,10 @@ export const pingContacts = () => {
         const ownPublicKey = user.identity.publicKey;
         const contacts = getState().contacts.toArray();
         const sendMessages = contacts.map(
-            (contact, index) => sendPingMessage(contact.publicKey, ownPublicKey),
+            (contact, index) => {
+                registerContactAddress(contact.publicKey, contact.address);
+                sendPingMessage(contact.publicKey, ownPublicKey);
+            }
         );
 
         return Promise.all(sendMessages);
