@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.github.helmethair_co.keydrop_go.Keydropgo;
 import android.content.ContextWrapper;
 import org.json.JSONObject;
@@ -15,11 +16,12 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.HashMap;
 
-public class SwarmModule extends ReactContextBaseJavaModule {
+public class SwarmModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
     private ReactApplicationContext reactContext;
     public SwarmModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
+        reactContext.addLifecycleEventListener(this);
     }
 
     @Override
@@ -47,5 +49,21 @@ public class SwarmModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             promise.resolve(e.toString());
         }
+    }
+
+    @Override
+    public void onHostResume() {
+        System.out.println("resume application");
+    }
+
+    @Override
+    public void onHostPause() {
+        System.out.println("pause application");
+    }
+
+    @Override
+    public void onHostDestroy() {
+        System.out.println("destroy application");
+        System.out.println(Keydropgo.StopNode());
     }
 }
