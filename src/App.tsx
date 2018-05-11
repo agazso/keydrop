@@ -6,6 +6,9 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
 import { HeaderTitleContainer } from './containers/HeaderTitleContainer';
+import { NativeModules } from "react-native";
+
+NativeModules.Swarm.show("yolóka").then(value  => console.log("returned: " + value));
 
 export default class App extends React.Component {
     public render() {
