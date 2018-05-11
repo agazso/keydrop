@@ -17,12 +17,38 @@ const apiSend = (address: string, message: string): Promise<void> => {
     };
     return new Promise((resolve, reject) => {
         try {
-            webSocket!.send(JSON.stringify(envelope));
+            const obj = pssMessage('pss_sendAsym', address, string2Bin(JSON.stringify(envelope)))
+            webSocket!.send(JSON.stringify(obj));
         } catch (e) {
             console.log(e);
         }
         resolve();
     });
+};
+
+// cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
+const toHexString = (byteArray: Uint8Array) => {
+    return Array.from(byteArray, function(byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('');
+};
+
+// equally cheekily borrowed from https://stackoverflow.com/questions/17720394/javascript-string-to-byte-to-string
+const string2Bin = (str: string) => {
+    const result = new Array<any>();
+    for (let i = 0; i < str.length; i++) {
+        result.push(str.charCodeAt(i));
+    }
+    return result;
+};
+
+const pssMessage = (method: string, pubkey: string, hexmessage: Array<any>) => {
+    return {
+        jsonrpc: '2.0',
+        id: 0, // it's for us to keep record of the requests
+        method: method,
+        params: [pubkey, "keydrop", hexmessage],
+    };
 };
 
 const messageToString = (message: Message): string => {
