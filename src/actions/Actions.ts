@@ -3,14 +3,22 @@ import { Map } from 'immutable';
 
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
-import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage, sendAckSendMessage, registerContactAddress } from '../network/Network';
+import {
+    connect,
+    sendInitiateContactMessage,
+    sendPingMessage,
+    sendSecretMessage,
+    sendAckSendMessage,
+    registerContactAddress,
+} from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
 import { encryptWithPublicKey } from '../crypto';
-import { PrivateIdentity } from '../models/Identity';
-import { createIdentity } from '../Swarm';
+import { PrivateIdentity, PublicIdentity } from '../models/Identity';
+import { pssGetPublicKey, pssGetBaseAddress, pssInit } from '../network/pssRpc';
+import { rpcConnect } from '../network/JSONRPC';
 
 export type ActionTypes =
     | CreateUserWithIdentityAction
@@ -29,7 +37,7 @@ export type ActionTypes =
 export interface CreateUserWithIdentityAction {
     type: 'CREATE-USER-WITH-IDENTITY';
     name: string;
-    identity: PrivateIdentity;
+    identity: PublicIdentity;
 }
 
 export interface DeleteUserAction {
@@ -85,7 +93,7 @@ export interface DeleteContactsAction {
     type: 'DELETE-CONTACTS';
 }
 
-export const createUserWithIdentity = (name: string, identity: PrivateIdentity): CreateUserWithIdentityAction => ({
+export const createUserWithIdentity = (name: string, identity: PublicIdentity): CreateUserWithIdentityAction => ({
     type: 'CREATE-USER-WITH-IDENTITY',
     name,
     identity,
@@ -146,7 +154,12 @@ export const deleteContacts = (): DeleteContactsAction => ({
 
 export const createUser = (name: string) => {
     return async (dispatch, getState: () => AppState) => {
-        const identity: PrivateIdentity = await createIdentity();
+        const publicKey = await pssGetPublicKey();
+        const address = await pssGetBaseAddress();
+        const identity: PublicIdentity = {
+            publicKey,
+            address,
+        };
         dispatch(createUserWithIdentity(name, identity));
     };
 };
@@ -257,9 +270,7 @@ const showSecretDialog = (secret: string) => {
 
 export const connectToNetwork = () => {
     return async (dispatch, getState: () => AppState) => {
-        const user = getState().user;
-        const ownPublicKey = user.identity.publicKey;
-       /* connect(ownPublicKey, {
+        await rpcConnect({
             onOpen: () => {
                 dispatch(pingSelf());
                 dispatch(pingContacts());
@@ -267,7 +278,8 @@ export const connectToNetwork = () => {
             onMessage: (envelope: MessageEnvelope) => {
                 dispatch(receiveMessageEnvelope(envelope));
             },
-        });*/
+        });
+        await pssInit();
     };
 };
 

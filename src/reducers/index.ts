@@ -19,6 +19,7 @@ import {
     cleanupContacts,
     updateContactLastSeen,
     pingContacts,
+    connectToNetwork,
 } from '../actions/Actions';
 import { generateRandomString } from '../random';
 
@@ -213,4 +214,5 @@ export const persistor = persistStore(store);
 
 setInterval(() => store.dispatch(timeTick()), 1000);
 setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
+store.dispatch(connectToNetwork());
 store.dispatch(generateContactRandom());

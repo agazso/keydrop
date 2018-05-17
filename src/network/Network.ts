@@ -1,54 +1,43 @@
 import { encryptWithPublicKey, encryptSym } from '../crypto';
 import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMessage, AckSendMessage } from './Message';
+import { Connection, ConnectionHandler, makeConnection } from './Connection';
 
-// const serverAddress = '192.168.56.1:8080';
-const serverAddress = 'keydrop.helmethair.co';
 const contactAddresses = {};
 
-const apiSend = (address: string, message: string): Promise<void> => {
-    if (webSocket == null) {
-        return Promise.resolve();
-    }
-
-    const envelope: MessageEnvelope = {
-        recipient: address,
-        sender: webSocket.ownPublicKey,
-        payload: message,
-    };
-    return new Promise((resolve, reject) => {
-        try {
-            const obj = pssMessage('pss_sendAsym', address, string2Bin(JSON.stringify(envelope)))
-            webSocket!.send(JSON.stringify(obj));
-        } catch (e) {
-            console.log(e);
-        }
-        resolve();
+let webSocket: Connection | null = null;
+export const connect = async (ownPublicKey: string, conn: ConnectionHandler = {}) => {
+    const connectPromise = new Promise((resolve, reject) => {
+        const onOpen = () => {
+            resolve();
+            if (conn.onOpen != null) {
+                conn.onOpen();
+            }
+        };
+        webSocket = makeConnection(ownPublicKey, {...conn, onOpen});
     });
+    await connectPromise;
 };
 
-// cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
-const toHexString = (byteArray: Uint8Array) => {
-    return Array.from(byteArray, function(byte) {
-        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-    }).join('');
-};
+const apiSend = (address: string, message: string): Promise<void> => {
+    // if (webSocket == null) {
+    //     return Promise.resolve();
+    // }
 
-// equally cheekily borrowed from https://stackoverflow.com/questions/17720394/javascript-string-to-byte-to-string
-const string2Bin = (str: string) => {
-    const result = new Array<any>();
-    for (let i = 0; i < str.length; i++) {
-        result.push(str.charCodeAt(i));
-    }
-    return result;
-};
-
-const pssMessage = (method: string, pubkey: string, hexmessage: Array<any>) => {
-    return {
-        jsonrpc: '2.0',
-        id: 0, // it's for us to keep record of the requests
-        method: method,
-        params: [pubkey, "keydrop", hexmessage],
-    };
+    // const envelope: MessageEnvelope = {
+    //     recipient: address,
+    //     sender: webSocket.ownPublicKey,
+    //     payload: message,
+    // };
+    // return new Promise((resolve, reject) => {
+    //     try {
+    //         const obj = pssMessage('pss_sendAsym', address, string2Bin(JSON.stringify(envelope)));
+    //         webSocket!.send(JSON.stringify(obj));
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    //     resolve();
+    // });
+    return Promise.resolve();
 };
 
 const messageToString = (message: Message): string => {
@@ -107,85 +96,3 @@ const sendAsymEncryptedMessage = (recipientPublicKey: string, message: string): 
     const encrypted = encryptWithPublicKey(recipientPublicKey, message);
     return apiSend(recipientPublicKey, encrypted);
 };
-
-interface ConnectionHandler {
-    onOpen?: () => void;
-    onMessage?: (message: MessageEnvelope) => void;
-    onError?: (reason: string) => void;
-    onClose?: (code: number, reason: string) => void;
-}
-
-interface Connection {
-    send: (data: string) => void;
-    ownPublicKey: string;
-}
-
-interface ConnectionHolder {
-    state: 'disconnected' | 'connecting' | 'connected';
-    ws: any;
-}
-
-export const makeConnection = (ownPublicKey: string, conn: ConnectionHandler): Connection => {
-    const url = `ws://${serverAddress}/ws/`;
-    const connHolder: ConnectionHolder = {
-        state: 'disconnected',
-        ws: null,
-    };
-
-    const setupConnection = (ch) => {
-        console.log(`Connecting to ${url}`);
-
-        ch.state = 'disconnected';
-        ch.ws = new WebSocket(url);
-        ch.state = 'connecting';
-        ch.ws.onopen = () => {
-            console.log('Connected to ', url);
-            ch.state = 'connected';
-            if (conn.onOpen != null) {
-                conn.onOpen();
-            }
-        };
-        ch.ws.onmessage = (e) => {
-            if (conn.onMessage != null) {
-                try {
-                    console.log('Received ', e.data);
-                    const envelope = JSON.parse(e.data) as MessageEnvelope;
-                    conn.onMessage(envelope);
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-        };
-        ch.ws.onerror = (e: any) => {
-            if (conn.onError != null) {
-                conn.onError(e.message);
-            }
-            console.log('Connection error', e.message);
-        };
-        ch.ws.onclose = (e: any) => {
-            if (conn.onClose != null) {
-                conn.onClose(e.code, e.reason);
-            }
-            console.log('Disconnected with close');
-            ch.state = 'disconnected';
-            if (ch.state !== 'connecting') {
-                ch.state = 'connecting';
-                setTimeout(() => setupConnection(ch), 5000);
-            }
-        };
-    };
-
-    setupConnection(connHolder);
-
-    return {
-        ownPublicKey,
-        send: (data: string): void => {
-            console.log('Sending data: ', data);
-            connHolder.ws.send(data);
-        },
-    };
-};
-
-let webSocket: Connection | null = null;
-export const connect = (ownPublicKey: string, conn: ConnectionHandler = {}) =>
-    webSocket = makeConnection(ownPublicKey, conn);

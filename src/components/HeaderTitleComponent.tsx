@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
         height: 40,
         alignItems: 'center',
         paddingTop: 20,
+        backgroundColor: Colors.WHITE,
     },
     settingsIconContainer: {
         width: 30,

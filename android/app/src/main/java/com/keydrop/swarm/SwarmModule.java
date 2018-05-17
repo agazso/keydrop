@@ -30,8 +30,10 @@ public class SwarmModule extends ReactContextBaseJavaModule implements Lifecycle
     }
 
     @ReactMethod
-    public void show(String message, Promise promise) {
-        promise.resolve(message + " " + Keydropgo.StartNode(this.reactContext.getFilesDir().getAbsolutePath()));
+    public void start() {
+        final String appPath = this.reactContext.getFilesDir().getAbsolutePath();
+        System.out.println("start application" + appPath);
+        Keydropgo.StartNode(appPath);
     }
 
     @ReactMethod
