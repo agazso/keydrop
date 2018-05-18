@@ -16,7 +16,7 @@ type PssRpcMethod =
     ;
 
 // cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
-const toHexString = (byteArray: Uint8Array) => {
+const toHexString = (byteArray: Array<number>) => {
     return Array.from(byteArray, (byte) => {
         // tslint:disable-next-line:no-bitwise
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
@@ -25,7 +25,7 @@ const toHexString = (byteArray: Uint8Array) => {
 
 // equally cheekily borrowed from https://stackoverflow.com/questions/17720394/javascript-string-to-byte-to-string
 const string2Bin = (str: string) => {
-    const result = new Array<any>();
+    const result = new Array<number>();
     for (let i = 0; i < str.length; i++) {
         result.push(str.charCodeAt(i));
     }
@@ -57,11 +57,19 @@ export const pssSetHint = async (publicKey: string, topic: string, address: stri
     return await rpcCall(pssRpcRequest('pss_setPeerPublicKey', [publicKey, topic, addressHint]));
 };
 
+const defaultTopic = 'keydrop';
 export const pssInit = async () => {
     const publicKey = await pssGetPublicKey();
     const baseAddress = await pssGetBaseAddress();
-    const topic = await pssStringToTopic('keydrop');
+    const topic = await pssStringToTopic(defaultTopic);
     const sub = await pssSubscribe(topic);
-    const h = await pssSetHint(publicKey, topic, baseAddress, 32);
-    console.log('pssInit: ', h);
+    console.log('pssInit: sub: ', sub);
+};
+
+export const pssSendMessage = async (publicKey: string, address: string, message: string) => {
+    const hexMessage = '0x' + toHexString(string2Bin(message));
+    const topic = await pssStringToTopic(defaultTopic);
+    const hint = await pssSetHint(publicKey, topic, address, 32);
+    const sendResult = await rpcCall(pssRpcRequest('pss_sendAsym', [publicKey, topic, hexMessage]));
+    console.log('pssSendMessage: ', sendResult);
 };

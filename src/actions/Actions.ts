@@ -4,7 +4,6 @@ import { Map } from 'immutable';
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
 import {
-    connect,
     sendInitiateContactMessage,
     sendPingMessage,
     sendSecretMessage,
@@ -161,6 +160,7 @@ export const createUser = (name: string) => {
             address,
         };
         dispatch(createUserWithIdentity(name, identity));
+        dispatch(pingSelf());
     };
 };
 
@@ -174,7 +174,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 if (contacts.has(message.publicKey)) {
                     const contact = contacts.get(message.publicKey);
                     if (!isContactOnline(contact)) {
-                        dispatch(pingContact(contact.publicKey));
+                        dispatch(pingContact(contact.publicKey, contact.address));
                     }
                     dispatch(updateContactLastSeen(contact.publicKey, Date.now()));
                     if (contact.state === 'invite-received') {
@@ -200,7 +200,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                     dispatch(updateContactName(contact.publicKey, message.name));
                     dispatch(updateContactLastSeen(contact.publicKey, Date.now()));
                     dispatch(updateContactState(contact.publicKey, 'contact'));
-                    dispatch(pingContact(contact.publicKey));
+                    dispatch(pingContact(contact.publicKey, contact.address));
                     return;
                 }
 
@@ -214,7 +214,10 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 return;
             }
             case 'secret': {
-                await sendAckSendMessage(message.publicKey, state.user.identity.publicKey, message.id);
+                if (state.contacts.has(message.publicKey)) {
+                    const contact = state.contacts.get(message.publicKey)!;
+                    await sendAckSendMessage(contact.publicKey, contact.address, state.user.identity.publicKey, message.id);
+                }
                 const contactName = getContactName(state.contacts, message.publicKey);
                 const buttons: AlertButton[] = [
                     {
@@ -291,8 +294,7 @@ export const sendInitiateContact = (publicKey: string, address: string, timestam
         registerContactAddress(publicKey, address);
         return sendInitiateContactMessage(
                 publicKey,
-                ownPublicKey,
-                ownAddress,
+                address,
                 timestamp,
                 random,
                 user.name,
@@ -308,7 +310,7 @@ export const pingContacts = () => {
         const sendMessages = contacts.map(
             (contact, index) => {
                 registerContactAddress(contact.publicKey, contact.address);
-                sendPingMessage(contact.publicKey, ownPublicKey);
+                sendPingMessage(contact.publicKey, contact.address, ownPublicKey);
             }
         );
 
@@ -316,11 +318,11 @@ export const pingContacts = () => {
     };
 };
 
-export const pingContact = (recipientPublicKey: string) => {
+export const pingContact = (recipientPublicKey: string, recipientAddress: string) => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
-        return sendPingMessage(recipientPublicKey, ownPublicKey);
+        return sendPingMessage(recipientPublicKey, recipientAddress, ownPublicKey);
     };
 };
 
@@ -328,7 +330,8 @@ export const pingSelf = () => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
-        return sendPingMessage(ownPublicKey, ownPublicKey);
+        const ownAddress = user.identity.address;
+        return sendPingMessage(ownPublicKey, ownAddress, ownPublicKey);
     };
 };
 
@@ -339,12 +342,12 @@ export const generateContactRandom = () => {
     };
 };
 
-export const sendData = (publicKey: string, data: string) => {
+export const sendSecret = (publicKey: string, address: string, data: string) => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
         console.log('Sending data', publicKey, data);
-        await sendSecretMessage(publicKey, ownPublicKey, data);
+        await sendSecretMessage(publicKey, address, ownPublicKey, data);
         dispatch(updateContactLastTransferStarted(publicKey, Date.now()));
     };
 };

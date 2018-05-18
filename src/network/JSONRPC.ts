@@ -58,6 +58,8 @@ export const rpcConnect = async (conn: ConnectionHandler = {}): Promise<Connecti
                 const resolveRequest = requestResolvers.get(response.id)!;
                 requestResolvers.delete(response.id);
                 resolveRequest(response.result);
+            } else {
+                console.error('Message without resolver ', response.id);
             }
         };
         connection = makeConnection('', {...conn, onOpen, onMessage});

@@ -32,7 +32,7 @@ public class SwarmModule extends ReactContextBaseJavaModule implements Lifecycle
     @ReactMethod
     public void start() {
         final String appPath = this.reactContext.getFilesDir().getAbsolutePath();
-        System.out.println("start application" + appPath);
+        System.out.println("start application, path: " + appPath);
         Keydropgo.StartNode(appPath);
     }
 

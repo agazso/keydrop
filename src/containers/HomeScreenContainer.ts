@@ -34,8 +34,8 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         onNotifyContacts: () => {
             dispatch(Actions.cleanupContacts());
         },
-        onSend: (publicKey: string, secret: string) => {
-            dispatch(Actions.sendData(publicKey, secret));
+        onSend: (publicKey: string, address: string, secret: string) => {
+            dispatch(Actions.sendSecret(publicKey, address, secret));
         },
     };
 };

@@ -8,7 +8,7 @@ import {
 import thunkMiddleware from 'redux-thunk';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web and AsyncStorage for react-native
-const immutableTransform = require('redux-persist-transform-immutable');
+import * as immutableTransform from 'redux-persist-transform-immutable';
 
 import { Contact, isContactPersistent } from '../models/Contact';
 import { User } from '../models/User';
@@ -208,7 +208,6 @@ export const store = createStore(
         applyMiddleware(thunkMiddleware),
     ),
 );
-// store.subscribe(() => console.log(store.getState()));
 
 export const persistor = persistStore(store);
 
@@ -216,3 +215,6 @@ setInterval(() => store.dispatch(timeTick()), 1000);
 setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
 store.dispatch(connectToNetwork());
 store.dispatch(generateContactRandom());
+
+console.log('store: ', store.getState());
+// store.subscribe(() => console.log(store.getState()));

@@ -18,7 +18,7 @@ export interface DispatchProps {
     onCreateUser: (username: string) => void;
     onCreateContact: (data: ContactData) => void;
     onNotifyContacts: () => void;
-    onSend: (publicKey: string, secret: string) => void;
+    onSend: (publicKey: string, address: string, secret: string) => void;
 }
 
 type Props = StateProps & DispatchProps;

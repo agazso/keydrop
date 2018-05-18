@@ -12,7 +12,7 @@ interface ContactItemProps {
     contact: Contact;
 
     onSelectContact: (contactPublicKey: string | null) => void;
-    onSend: (publicKey: string, secret: string) => void;
+    onSend: (publicKey: string, address: string, secret: string) => void;
 }
 
 const CopyIconName = Platform.OS === 'ios' ? 'ios-copy-outline' : 'md-copy';
@@ -66,7 +66,7 @@ export class ContactItem extends React.PureComponent<ContactItemProps> {
 
     private onSend = async () => {
         const data = await Clipboard.getString();
-        this.props.onSend(this.props.contact.publicKey, data);
+        this.props.onSend(this.props.contact.publicKey, this.props.contact.address, data);
         this.props.onSelectContact(null);
     }
 
