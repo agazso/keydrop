@@ -152,6 +152,9 @@ export const deleteContacts = (): DeleteContactsAction => ({
 });
 
 export const createUser = (name: string) => {
+    if (name == null) {
+        return;
+    }
     return async (dispatch, getState: () => AppState) => {
         const publicKey = await pssGetPublicKey();
         const address = await pssGetBaseAddress();
