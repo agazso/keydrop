@@ -1,19 +1,16 @@
 import { MessageEnvelope } from './Message';
 
-// const serverAddress = '192.168.56.1:8080';
-// const serverAddress = 'keydrop.helmethair.co';
 const serverAddress = 'localhost:8546';
 
-export interface ConnectionHandler {
+export interface ConnectionHandler<MessageType> {
     onOpen?: () => void;
-    onMessage?: (message: MessageEnvelope) => void;
+    onMessage?: (message: MessageType) => void;
     onError?: (reason: string) => void;
     onClose?: (code: number, reason: string) => void;
 }
 
 export interface Connection {
     send: (data: string) => void;
-    ownPublicKey: string;
 }
 
 interface ConnectionHolder {
@@ -21,8 +18,8 @@ interface ConnectionHolder {
     ws: any;
 }
 
-export const makeConnection = (ownPublicKey: string, conn: ConnectionHandler): Connection => {
-    const url = `ws://${serverAddress}/ws/`;
+export const wsConnect = (conn: ConnectionHandler<string>): Connection => {
+    const url = `ws://${serverAddress}/`;
     const connHolder: ConnectionHolder = {
         state: 'disconnected',
         ws: null,
@@ -45,8 +42,6 @@ export const makeConnection = (ownPublicKey: string, conn: ConnectionHandler): C
             if (conn.onMessage != null) {
                 try {
                     console.log('Received ', e.data);
-                    // const envelope = JSON.parse(e.data) as MessageEnvelope;
-                    // conn.onMessage(envelope);
                     conn.onMessage(e.data);
                 } catch (e) {
                     console.log(e);
@@ -75,7 +70,6 @@ export const makeConnection = (ownPublicKey: string, conn: ConnectionHandler): C
     setupConnection(connHolder);
 
     return {
-        ownPublicKey,
         send: (data: string): void => {
             console.log('Sending data: ', data);
             connHolder.ws.send(data);

@@ -1,14 +1,14 @@
-import { Connection, ConnectionHandler, makeConnection } from './Connection';
+import { Connection, ConnectionHandler, wsConnect } from './Connection';
 
 let messageId = 0;
 let connection: Connection | undefined;
 const requestResolvers = new Map<number, (result: string) => void>();
 
-interface RpcRequest {
+export interface RpcRequest<MethodType, ParamType> {
     jsonrpc: string;
-    id: number;
-    method: string;
-    params: Array<any>;
+    id?: number;
+    method: MethodType;
+    params: ParamType;
 }
 
 interface RpcResponse {
@@ -23,7 +23,7 @@ const nextMessageId = () => {
     return id;
 };
 
-export const rpcRequest = (method: string, params: Array<any> = []): RpcRequest => {
+export const rpcRequest = <MethodType, ParamType>(method: MethodType, params: ParamType): RpcRequest<MethodType, ParamType> => {
     return {
         jsonrpc: '2.0',
         id: nextMessageId(),
@@ -32,11 +32,11 @@ export const rpcRequest = (method: string, params: Array<any> = []): RpcRequest 
     };
 };
 
-export const rpcCall = async (request: RpcRequest) => {
+export const rpcCall = async <MethodType, ParamType>(request: RpcRequest<MethodType, ParamType>) => {
     try {
         connection!.send(JSON.stringify(request));
         return new Promise<string>((resolve, reject) => {
-            requestResolvers.set(request.id, resolve);
+            requestResolvers.set(request.id!, resolve);
         });
     } catch (e) {
         console.log(e);
@@ -44,7 +44,11 @@ export const rpcCall = async (request: RpcRequest) => {
     }
 };
 
-export const rpcConnect = async (conn: ConnectionHandler = {}): Promise<Connection> => {
+const isRequest = <MethodType, ParamType>(r: RpcRequest<MethodType, ParamType> | RpcResponse): r is RpcRequest<MethodType, ParamType> => {
+    return (r as RpcRequest<MethodType, ParamType>).method !== undefined;
+};
+
+export const rpcConnect = async <MethodType, ParamType>(conn: ConnectionHandler<RpcRequest<MethodType, ParamType>> = {}): Promise<Connection> => {
     const connectPromise = new Promise<Connection>((resolve, reject) => {
         const onOpen = () => {
             resolve(connection);
@@ -52,17 +56,25 @@ export const rpcConnect = async (conn: ConnectionHandler = {}): Promise<Connecti
                 conn.onOpen();
             }
         };
-        const onMessage = (e) => {
-            const response = JSON.parse(e) as RpcResponse;
-            if (requestResolvers.has(response.id)) {
-                const resolveRequest = requestResolvers.get(response.id)!;
-                requestResolvers.delete(response.id);
-                resolveRequest(response.result);
+        const onMessage = (msg: string) => {
+            const r = JSON.parse(msg) as RpcResponse | RpcRequest<MethodType, ParamType>;
+            if (isRequest(r)) {
+                const request = r;
+                if (conn.onMessage != null) {
+                    conn.onMessage(r);
+                }
             } else {
-                console.error('Message without resolver ', response.id);
+                const response = r;
+                if (requestResolvers.has(response.id)) {
+                    const resolveRequest = requestResolvers.get(response.id)!;
+                    requestResolvers.delete(response.id);
+                    resolveRequest(response.result);
+                } else {
+                    console.error('Message without resolver ', response.id);
+                }
             }
         };
-        connection = makeConnection('', {...conn, onOpen, onMessage});
+        connection = wsConnect({...conn, onOpen, onMessage});
     });
     return await connectPromise;
 };

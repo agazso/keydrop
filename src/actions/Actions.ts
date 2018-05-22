@@ -16,7 +16,7 @@ import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
 import { encryptWithPublicKey } from '../crypto';
 import { PrivateIdentity, PublicIdentity } from '../models/Identity';
-import { pssGetPublicKey, pssGetBaseAddress, pssInit } from '../network/pssRpc';
+import { pssGetPublicKey, pssGetBaseAddress, pssConnect } from '../network/pssRpc';
 import { rpcConnect } from '../network/JSONRPC';
 
 export type ActionTypes =
@@ -273,16 +273,15 @@ const showSecretDialog = (secret: string) => {
 
 export const connectToNetwork = () => {
     return async (dispatch, getState: () => AppState) => {
-        await rpcConnect({
+        await pssConnect({
             onOpen: () => {
-                dispatch(pingSelf());
                 dispatch(pingContacts());
             },
-            onMessage: (envelope: MessageEnvelope) => {
+            onMessage: (message: string) => {
+                const envelope = JSON.parse(message) as MessageEnvelope;
                 dispatch(receiveMessageEnvelope(envelope));
             },
         });
-        await pssInit();
     };
 };
 

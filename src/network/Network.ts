@@ -1,6 +1,6 @@
 import { encryptWithPublicKey, encryptSym } from '../crypto';
 import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMessage, AckSendMessage } from './Message';
-import { Connection, ConnectionHandler, makeConnection } from './Connection';
+import { Connection, ConnectionHandler } from './Connection';
 import { pssSendMessage } from './pssRpc';
 
 const contactAddresses = {};

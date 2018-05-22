@@ -1,8 +1,8 @@
-import { Connection, ConnectionHandler, makeConnection } from './Connection';
+import { Connection, ConnectionHandler } from './Connection';
 import { Connect } from 'react-redux';
-import { rpcRequest, rpcCall } from './JSONRPC';
+import { rpcRequest, rpcCall, RpcRequest, rpcConnect } from './JSONRPC';
 
-type PssRpcMethod =
+type PssRpcOutgoingMethod =
     | 'pss_getPublicKey'
     | 'pss_baseAddr'
     | 'pss_stringToTopic'
@@ -13,6 +13,10 @@ type PssRpcMethod =
     | 'pss_sendSym'
     | 'pss_GetSymmetricAddressHint'
     | 'pss_GetAsymmetricAddressHint'
+    ;
+
+type PssRpcIncomingMethod =
+    | 'pss_subscription'
     ;
 
 // cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
@@ -32,7 +36,7 @@ const string2Bin = (str: string) => {
     return result;
 };
 
-const pssRpcRequest = (method: PssRpcMethod, params: Array<any> = []) => {
+const pssRpcRequest = (method: PssRpcOutgoingMethod, params: Array<any> = []) => {
     return rpcRequest(method, params);
 };
 
@@ -58,11 +62,26 @@ export const pssSetHint = async (publicKey: string, topic: string, address: stri
 };
 
 const defaultTopic = 'keydrop';
-export const pssInit = async () => {
+export const pssConnect = async (conn: ConnectionHandler<string>) => {
+    const rpcConnectionHandler: ConnectionHandler<RpcRequest<PssRpcIncomingMethod, PssSubscription>> = {
+        onOpen: undefined,
+        onClose: conn.onClose,
+        onError: conn.onError,
+        onMessage: (request) => {
+            if (conn.onMessage != null) {
+                conn.onMessage(pssReceiveMessage(request));
+            }
+        },
+    };
+    await rpcConnect(rpcConnectionHandler);
     const publicKey = await pssGetPublicKey();
     const baseAddress = await pssGetBaseAddress();
     const topic = await pssStringToTopic(defaultTopic);
     const sub = await pssSubscribe(topic);
+
+    if (conn.onOpen != null) {
+        conn.onOpen();
+    }
     console.log('pssInit: sub: ', sub);
 };
 
@@ -72,4 +91,19 @@ export const pssSendMessage = async (publicKey: string, address: string, message
     const hint = await pssSetHint(publicKey, topic, address, 32);
     const sendResult = await rpcCall(pssRpcRequest('pss_sendAsym', [publicKey, topic, hexMessage]));
     console.log('pssSendMessage: ', sendResult);
+};
+
+interface PssSubscriptionResult {
+    Msg: string;
+    Asymmetric: boolean;
+    Key: string;
+}
+
+interface PssSubscription {
+    subscription: string;
+    result: PssSubscriptionResult;
+}
+
+const pssReceiveMessage = (request: RpcRequest<PssRpcIncomingMethod, PssSubscription>): string => {
+    return request.params.result.Msg;
 };
