@@ -31,9 +31,7 @@ public class SwarmModule extends ReactContextBaseJavaModule implements Lifecycle
 
     @ReactMethod
     public void start() {
-        final String appPath = this.reactContext.getFilesDir().getAbsolutePath();
-        System.out.println("start application, path: " + appPath);
-        Keydropgo.StartNode(appPath);
+        this.startNode();
     }
 
     @ReactMethod
@@ -53,14 +51,23 @@ public class SwarmModule extends ReactContextBaseJavaModule implements Lifecycle
         }
     }
 
+    private void startNode() {
+        final String appPath = this.reactContext.getFilesDir().getAbsolutePath();
+        System.out.println("startNode, path: " + appPath);
+        final String result = Keydropgo.StartNode(appPath);
+        System.out.println("StartNode result: " + result);
+    }
+
     @Override
     public void onHostResume() {
         System.out.println("resume application");
+        this.startNode();
     }
 
     @Override
     public void onHostPause() {
         System.out.println("pause application");
+        System.out.println(Keydropgo.StopNode());
     }
 
     @Override

@@ -17,6 +17,10 @@ import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
 
+  static {
+    System.loadLibrary("log_redirect_jni");
+  }
+
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
     public boolean getUseDeveloperSupport() {
