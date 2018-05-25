@@ -11,6 +11,7 @@ import {
     Alert,
     Easing,
     Platform,
+    Clipboard,
 } from 'react-native';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -217,6 +218,14 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                     </View>
                     <Text style={styles.listHeaderButtonText}>Scan code</Text>
                 </TouchableView>
+                <TouchableView
+                    style={styles.listHeaderRightButton}
+                    onPress={() => {
+                        Clipboard.setString(this.generateQRCodeValue());
+                    }}
+                >
+                    <Ionicon name='ios-copy' />
+                </TouchableView>
             </View>
             <View style={styles.listHeaderBottom}>
                 <View style={styles.horizontalRuler}></View>
@@ -286,7 +295,13 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                         <Ionicon name='ios-close' size={40} />
                     </TouchableView>
 
-                    <TouchableView>
+                    <TouchableView onPress={async () => {
+                        const data = `{"publicKey":"0x0420412276ef46a3a4999c77288409aef2a6f8c264ed80edc13247e3a99e88964b6eec8efdefa45c570418b87b472a49c1998bc7146bea0c770b3f6387cfd0a8d1","address":"0xc21392922a33c7088605033b98a0bf4e22a17943cebd5b908cc51379402fc1a2","timestamp":1527162775933,"random":"6d2d72b6cb85fc545537a7efb5336d0b49ff9253c107c8cce24c8f80513c48a1"}`;
+                        const event = {
+                            data,
+                        };
+                        this.onScanSuccess(event);
+                    }}>
                         <Ionicon name='ios-attach-outline' size={32} />
                     </TouchableView>
                 </View>
@@ -320,6 +335,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
 
     private onScanSuccess = (event) => {
         try {
+            console.log(event);
             const data: ContactData = JSON.parse(event.data);
             this.props.onCreateContact(data);
         } catch (e) {

@@ -3,14 +3,8 @@ import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMe
 import { Connection, ConnectionHandler } from './Connection';
 import { pssSendMessage } from './pssRpc';
 
-const contactAddresses = {};
-
 const messageToString = (message: Message): string => {
     return JSON.stringify(message);
-};
-
-export const registerContactAddress = (publicKey: string, address: string) => {
-    contactAddresses[publicKey] = address;
 };
 
 export const sendPingMessage = (recipientPublicKey: string, recipientAddress: string, ownPublicKey: string): Promise<void> => {

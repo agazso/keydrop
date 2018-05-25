@@ -8,7 +8,6 @@ import {
     sendPingMessage,
     sendSecretMessage,
     sendAckSendMessage,
-    registerContactAddress,
 } from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
@@ -278,7 +277,12 @@ export const connectToNetwork = () => {
                 dispatch(pingContacts());
             },
             onMessage: (message: string) => {
-                const envelope = JSON.parse(message) as MessageEnvelope;
+                console.log('onMessage: ', message);
+                const envelope: MessageEnvelope = {
+                    recipient: '',
+                    sender: '',
+                    payload: message,
+                };
                 dispatch(receiveMessageEnvelope(envelope));
             },
         });
@@ -290,7 +294,6 @@ export const sendInitiateContact = (publicKey: string, address: string, timestam
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
         const ownAddress = user.identity.address;
-        registerContactAddress(publicKey, address);
         return sendInitiateContactMessage(
                 publicKey,
                 address,
@@ -308,7 +311,6 @@ export const pingContacts = () => {
         const contacts = getState().contacts.toArray();
         const sendMessages = contacts.map(
             (contact, index) => {
-                registerContactAddress(contact.publicKey, contact.address);
                 sendPingMessage(contact.publicKey, contact.address, ownPublicKey);
             }
         );

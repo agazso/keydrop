@@ -1,6 +1,7 @@
 import { MessageEnvelope } from './Message';
 
-const serverAddress = 'localhost:8546';
+// const serverAddress = 'localhost:8546';
+const serverAddress = '192.168.1.3:8547';
 
 export interface ConnectionHandler<MessageType> {
     onOpen?: () => void;

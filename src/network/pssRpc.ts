@@ -1,6 +1,7 @@
 import { Connection, ConnectionHandler } from './Connection';
 import { Connect } from 'react-redux';
 import { rpcRequest, rpcCall, RpcRequest, rpcConnect } from './JSONRPC';
+import { hexToString, toHexString, string2Bin } from '../string';
 
 type PssRpcOutgoingMethod =
     | 'pss_getPublicKey'
@@ -18,23 +19,6 @@ type PssRpcOutgoingMethod =
 type PssRpcIncomingMethod =
     | 'pss_subscription'
     ;
-
-// cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
-const toHexString = (byteArray: Array<number>) => {
-    return Array.from(byteArray, (byte) => {
-        // tslint:disable-next-line:no-bitwise
-        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-    }).join('');
-};
-
-// equally cheekily borrowed from https://stackoverflow.com/questions/17720394/javascript-string-to-byte-to-string
-const string2Bin = (str: string) => {
-    const result = new Array<number>();
-    for (let i = 0; i < str.length; i++) {
-        result.push(str.charCodeAt(i));
-    }
-    return result;
-};
 
 const pssRpcRequest = (method: PssRpcOutgoingMethod, params: Array<any> = []) => {
     return rpcRequest(method, params);
@@ -90,7 +74,7 @@ export const pssSendMessage = async (publicKey: string, address: string, message
     const topic = await pssStringToTopic(defaultTopic);
     const hint = await pssSetHint(publicKey, topic, address, 32);
     const sendResult = await rpcCall(pssRpcRequest('pss_sendAsym', [publicKey, topic, hexMessage]));
-    console.log('pssSendMessage: ', sendResult);
+    console.log('pssSendMessage: ', address, message, sendResult);
 };
 
 interface PssSubscriptionResult {
@@ -105,5 +89,5 @@ interface PssSubscription {
 }
 
 const pssReceiveMessage = (request: RpcRequest<PssRpcIncomingMethod, PssSubscription>): string => {
-    return request.params.result.Msg;
+    return hexToString(request.params.result.Msg);
 };
