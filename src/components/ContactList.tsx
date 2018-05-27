@@ -230,6 +230,7 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
             address: this.props.user.identity.address,
             timestamp: Date.now(),
             random: this.props.contactRandom,
+            name: this.props.user.name,
         };
         return JSON.stringify(data);
     }

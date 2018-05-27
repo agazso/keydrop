@@ -3,4 +3,5 @@ interface ContactData {
     address: string;
     timestamp: number;
     random: string;
+    name: string;
 }
