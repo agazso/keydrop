@@ -16,7 +16,7 @@ export interface Connection {
 
 interface ConnectionHolder {
     state: 'disconnected' | 'connecting' | 'connected';
-    ws: any;
+    ws: WebSocket | null;
 }
 
 export const wsConnect = (conn: ConnectionHandler<string>): Connection => {
@@ -73,7 +73,7 @@ export const wsConnect = (conn: ConnectionHandler<string>): Connection => {
     return {
         send: (data: string): void => {
             console.log('Sending data: ', data);
-            connHolder.ws.send(data);
+            connHolder.ws!.send(data);
         },
     };
 };
