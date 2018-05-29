@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
         fontFamily: DefaultFont,
         fontSize: 18,
         textAlign: 'center',
-        paddingTop: 20,
+        paddingTop: 10,
     },
     contactIconContainer: {
         flexDirection: 'row',
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
         paddingTop: 20,
     },
     textInputName: {
-        height: 50,
+        height: 60,
         fontSize: 32,
         color: Colors.DARK_GRAY,
         paddingHorizontal: 50,

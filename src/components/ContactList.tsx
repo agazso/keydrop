@@ -218,14 +218,6 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                     </View>
                     <Text style={styles.listHeaderButtonText}>Scan code</Text>
                 </TouchableView>
-                <TouchableView
-                    style={styles.listHeaderRightButton}
-                    onPress={() => {
-                        Clipboard.setString(this.generateQRCodeValue());
-                    }}
-                >
-                    <Ionicon name='ios-copy' />
-                </TouchableView>
             </View>
             <View style={styles.listHeaderBottom}>
                 <View style={styles.horizontalRuler}></View>

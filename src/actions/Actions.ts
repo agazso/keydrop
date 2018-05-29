@@ -17,6 +17,7 @@ import { encryptWithPublicKey } from '../crypto';
 import { PrivateIdentity, PublicIdentity } from '../models/Identity';
 import { pssGetPublicKey, pssGetBaseAddress, pssConnect } from '../network/pssRpc';
 import { rpcConnect } from '../network/JSONRPC';
+import { Screen } from '../Screen';
 
 export type ActionTypes =
     | CreateUserWithIdentityAction
@@ -30,6 +31,7 @@ export type ActionTypes =
     | UpdateContactRandomAction
     | CleanupContactsAction
     | DeleteContactsAction
+    | ChangeScreenAction
     ;
 
 export interface CreateUserWithIdentityAction {
@@ -91,6 +93,11 @@ export interface DeleteContactsAction {
     type: 'DELETE-CONTACTS';
 }
 
+export interface ChangeScreenAction {
+    type: 'CHANGE-SCREEN';
+    screen: Screen;
+}
+
 export const createUserWithIdentity = (name: string, identity: PublicIdentity): CreateUserWithIdentityAction => ({
     type: 'CREATE-USER-WITH-IDENTITY',
     name,
@@ -148,6 +155,11 @@ export const cleanupContacts = (): CleanupContactsAction => ({
 
 export const deleteContacts = (): DeleteContactsAction => ({
     type: 'DELETE-CONTACTS',
+});
+
+export const changeScreen = (screen: Screen): ChangeScreenAction => ({
+    type: 'CHANGE-SCREEN',
+    screen,
 });
 
 export const createUser = (name: string) => {

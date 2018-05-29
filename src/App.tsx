@@ -8,6 +8,7 @@ import { HomeScreenContainer } from './containers/HomeScreenContainer';
 import { HeaderTitleContainer } from './containers/HeaderTitleContainer';
 
 import { NativeModules } from 'react-native';
+
 NativeModules.Swarm.start();
 
 export default class App extends React.Component {
@@ -15,7 +16,6 @@ export default class App extends React.Component {
         return (
             <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
-                    <HeaderTitleContainer/>
                     <HomeScreenContainer/>
                 </PersistGate>
             </Provider>

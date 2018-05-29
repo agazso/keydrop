@@ -5,16 +5,32 @@ import { Contact, isContactOnline } from '../models/Contact';
 import { HomeScreen, StateProps, DispatchProps } from '../components/HomeScreen';
 import * as Actions from '../actions/Actions';
 import { isTimestampValid } from '../validation';
+import { Screen } from '../Screen';
+
+const getScreenToShow = (state: AppState): Screen => {
+    if (state.screen === 'loading') {
+        if (state.user.name !== '') {
+            return 'home';
+        } else {
+            return 'loading';
+        }
+    }
+    if (state.user.name === '') {
+        return 'registration';
+    }
+    return state.screen;
+};
 
 const mapStateToProps = (state: AppState, ownProps): StateProps => {
     const contacts = state.contacts.toArray();
     const currentTimestamp = state.currentTimestamp;
     const onlineContacts = contacts.filter(contact => isContactOnline(contact, currentTimestamp));
     const offlineContacts = contacts.filter(contact => !isContactOnline(contact, currentTimestamp));
+    const screenToShow = getScreenToShow(state);
 
     return {
         contacts: onlineContacts.concat(offlineContacts),
-        alreadyHasKey: state.user.name !== '',
+        screenToShow,
         user: state.user,
         contactRandom: state.contactRandom,
     };
@@ -23,7 +39,13 @@ const mapStateToProps = (state: AppState, ownProps): StateProps => {
 const mapDispatchToProps = (dispatch): DispatchProps => {
     return {
         onCreateUser: (username: string) => {
+            dispatch(Actions.changeScreen('loading'));
             dispatch(Actions.createUser(username));
+        },
+        onDeleteUser: () => {
+            dispatch(Actions.deleteUser());
+            dispatch(Actions.deleteContacts());
+            dispatch(Actions.changeScreen('registration'));
         },
         onCreateContact: (data: ContactData) => {
             if (isTimestampValid(data.timestamp)) {
@@ -36,6 +58,10 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         },
         onSend: (publicKey: string, address: string, secret: string) => {
             dispatch(Actions.sendSecret(publicKey, address, secret));
+        },
+        onCloseSettings: () => {
+            console.log('onCloseSettings');
+            dispatch(Actions.changeScreen('home'));
         },
     };
 };

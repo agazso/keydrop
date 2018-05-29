@@ -3,18 +3,20 @@ import { connect } from 'react-redux';
 import { AppState } from '../reducers/index';
 import { StateProps, DispatchProps, HeaderTitleComponent } from '../components/HeaderTitleComponent';
 import * as Actions from '../actions/Actions';
+import { Screen } from '../Screen';
 
 const mapStateToProps = (state: AppState, ownProps): StateProps => {
     return {
+        screenToShow: state.screen,
     };
 };
 
 const mapDispatchToProps = (dispatch): DispatchProps => {
     return {
-        onPressSettings: () => {
+        onPressSettings: (currentScreen: Screen) => {
             console.log('onPressSettings');
-            dispatch(Actions.deleteContacts());
-            dispatch(Actions.deleteUser());
+            const nextScreen = currentScreen === 'settings' ? 'home' : 'settings';
+            dispatch(Actions.changeScreen(nextScreen));
         },
     };
 };

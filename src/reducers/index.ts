@@ -22,12 +22,14 @@ import {
     connectToNetwork,
 } from '../actions/Actions';
 import { generateRandomString } from '../random';
+import { Screen } from '../Screen';
 
 export interface AppState {
     contacts: Map<string, Contact>;
     user: User;
     currentTimestamp: number;
     contactRandom: string;
+    screen: Screen;
 }
 
 interface Contacts {
@@ -52,6 +54,7 @@ const defaultState: AppState = {
     user: defaultUser,
     currentTimestamp: Date.now(),
     contactRandom: '',
+    screen: 'home',
 };
 
 const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, action: ActionTypes): Map<string, Contact> => {
@@ -184,16 +187,26 @@ const contactRandomReducer = (contactRandom: string = '', action: ActionTypes): 
     return contactRandom;
 };
 
+const screenReducer = (screen: Screen = 'home', action: ActionTypes): Screen => {
+    switch (action.type) {
+        case 'CHANGE-SCREEN': {
+            return action.screen;
+        }
+    }
+    return screen;
+};
+
 export const reducer = combineReducers<AppState>({
     contacts: contactsReducer,
     user: userReducer,
     currentTimestamp: currentTimestampReducer,
     contactRandom: contactRandomReducer,
+    screen: screenReducer,
 });
 
 const persistConfig = {
     transforms: [immutableTransform({
-        blacklist: ['currentTimestamp', 'contactRandom'],
+        blacklist: ['currentTimestamp', 'contactRandom', 'screen'],
     })],
     key: 'root',
     storage,
@@ -211,10 +224,10 @@ export const store = createStore(
 
 export const persistor = persistStore(store);
 
-setInterval(() => store.dispatch(timeTick()), 1000);
+// setInterval(() => store.dispatch(timeTick()), 1000);
 setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
 store.dispatch(connectToNetwork());
 store.dispatch(generateContactRandom());
 
 console.log('store: ', store.getState());
-// store.subscribe(() => console.log(store.getState()));
+store.subscribe(() => console.log(store.getState()));
