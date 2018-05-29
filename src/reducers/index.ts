@@ -224,7 +224,7 @@ export const store = createStore(
 
 export const persistor = persistStore(store);
 
-// setInterval(() => store.dispatch(timeTick()), 1000);
+setInterval(() => store.dispatch(timeTick()), 1000);
 setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
 store.dispatch(connectToNetwork());
 store.dispatch(generateContactRandom());
