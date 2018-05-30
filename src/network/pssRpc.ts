@@ -46,7 +46,7 @@ export const pssSetHint = async (publicKey: string, topic: string, address: stri
 };
 
 const defaultTopic = 'keydrop';
-export const pssConnect = async (conn: ConnectionHandler<string>) => {
+export const pssConnect = async (serverAddress: string, conn: ConnectionHandler<string>) => {
     const rpcConnectionHandler: ConnectionHandler<RpcRequest<PssRpcIncomingMethod, PssSubscription>> = {
         onOpen: undefined,
         onClose: conn.onClose,
@@ -57,7 +57,7 @@ export const pssConnect = async (conn: ConnectionHandler<string>) => {
             }
         },
     };
-    await rpcConnect(rpcConnectionHandler);
+    await rpcConnect(serverAddress, rpcConnectionHandler);
     const publicKey = await pssGetPublicKey();
     const baseAddress = await pssGetBaseAddress();
     const topic = await pssStringToTopic(defaultTopic);

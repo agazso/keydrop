@@ -1,8 +1,5 @@
 import { MessageEnvelope } from './Message';
 
-// const serverAddress = 'localhost:8546';
-const serverAddress = '192.168.1.3:8546';
-
 export interface ConnectionHandler<MessageType> {
     onOpen?: () => void;
     onMessage?: (message: MessageType) => void;
@@ -19,7 +16,7 @@ interface ConnectionHolder {
     ws: WebSocket | null;
 }
 
-export const wsConnect = (conn: ConnectionHandler<string>): Connection => {
+export const wsConnect = (serverAddress: string, conn: ConnectionHandler<string>): Connection => {
     const url = `ws://${serverAddress}/`;
     const connHolder: ConnectionHolder = {
         state: 'disconnected',

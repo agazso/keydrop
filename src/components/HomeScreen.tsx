@@ -16,6 +16,7 @@ export interface StateProps {
     screenToShow: Screen;
     user: User;
     contactRandom: string;
+    serverAddress: string;
 }
 
 export interface DispatchProps {
@@ -25,6 +26,7 @@ export interface DispatchProps {
     onNotifyContacts: () => void;
     onSend: (publicKey: string, address: string, secret: string) => void;
     onCloseSettings: () => void;
+    onChangeServerAddress: (serverAddress: string) => void;
 }
 
 type Props = StateProps & DispatchProps;

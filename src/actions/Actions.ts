@@ -32,6 +32,7 @@ export type ActionTypes =
     | CleanupContactsAction
     | DeleteContactsAction
     | ChangeScreenAction
+    | ChangeServerAddress
     ;
 
 export interface CreateUserWithIdentityAction {
@@ -98,6 +99,11 @@ export interface ChangeScreenAction {
     screen: Screen;
 }
 
+export interface ChangeServerAddress {
+    type: 'CHANGE-SERVER-ADDRESS';
+    serverAddress: string;
+}
+
 export const createUserWithIdentity = (name: string, identity: PublicIdentity): CreateUserWithIdentityAction => ({
     type: 'CREATE-USER-WITH-IDENTITY',
     name,
@@ -160,6 +166,11 @@ export const deleteContacts = (): DeleteContactsAction => ({
 export const changeScreen = (screen: Screen): ChangeScreenAction => ({
     type: 'CHANGE-SCREEN',
     screen,
+});
+
+export const changeServerAddress = (serverAddress: string): ChangeServerAddress => ({
+    type: 'CHANGE-SERVER-ADDRESS',
+    serverAddress,
 });
 
 export const createUser = (name: string) => {
@@ -284,7 +295,8 @@ const showSecretDialog = (secret: string) => {
 
 export const connectToNetwork = () => {
     return async (dispatch, getState: () => AppState) => {
-        await pssConnect({
+        const serverAddress = getState().serverAddress;
+        await pssConnect(serverAddress, {
             onOpen: () => {
                 dispatch(pingContacts());
             },

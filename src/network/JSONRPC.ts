@@ -48,7 +48,7 @@ const isRequest = <MethodType, ParamType>(r: RpcRequest<MethodType, ParamType> |
     return (r as RpcRequest<MethodType, ParamType>).method !== undefined;
 };
 
-export const rpcConnect = async <MethodType, ParamType>(conn: ConnectionHandler<RpcRequest<MethodType, ParamType>> = {}): Promise<Connection> => {
+export const rpcConnect = async <MethodType, ParamType>(serverAddress, conn: ConnectionHandler<RpcRequest<MethodType, ParamType>> = {}): Promise<Connection> => {
     const connectPromise = new Promise<Connection>((resolve, reject) => {
         const onOpen = () => {
             resolve(connection);
@@ -74,7 +74,7 @@ export const rpcConnect = async <MethodType, ParamType>(conn: ConnectionHandler<
                 }
             }
         };
-        connection = wsConnect({...conn, onOpen, onMessage});
+        connection = wsConnect(serverAddress, {...conn, onOpen, onMessage});
     });
     return await connectPromise;
 };

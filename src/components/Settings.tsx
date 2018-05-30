@@ -4,13 +4,16 @@ import Ionicon from 'react-native-vector-icons/Ionicons';
 
 import { TouchableView } from './TouchableView';
 import { Colors, IconSize } from '../styles';
+import { SimpleTextInput } from './SimpleTextInput';
 
 export interface StateProps {
+    serverAddress: string;
 }
 
 export interface DispatchProps {
     onDeleteUser: () => void;
     onCloseSettings: () => void;
+    onChangeServerAddress: (serverAddress: string) => void;
 }
 
 export type Props = StateProps & DispatchProps;
@@ -24,6 +27,12 @@ export class Settings extends React.Component<Props, State> {
     public render() {
         return (
             <View style={styles.mainContainer}>
+                <SimpleTextInput
+                    style={{}}
+                    placeholder='Server address'
+                    defaultValue={this.props.serverAddress}
+                    onChangeText={this.props.onChangeServerAddress}
+                />
                 <ScrollView style={styles.logContainer} />
 
                 <TouchableView onPress={() => {

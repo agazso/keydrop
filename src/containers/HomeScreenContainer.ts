@@ -33,6 +33,7 @@ const mapStateToProps = (state: AppState, ownProps): StateProps => {
         screenToShow,
         user: state.user,
         contactRandom: state.contactRandom,
+        serverAddress: state.serverAddress,
     };
 };
 
@@ -49,7 +50,7 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         },
         onCreateContact: (data: ContactData) => {
             if (isTimestampValid(data.timestamp)) {
-                dispatch(Actions.createContact(data.publicKey, data.address, '', 'invite-sent'));
+                dispatch(Actions.createContact(data.publicKey, data.address, data.random, 'invite-sent'));
                 dispatch(Actions.sendInitiateContact(data.publicKey, data.address, data.timestamp, data.random));
             }
         },
@@ -62,6 +63,9 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
         onCloseSettings: () => {
             console.log('onCloseSettings');
             dispatch(Actions.changeScreen('home'));
+        },
+        onChangeServerAddress: (serverAddress: string) => {
+            dispatch(Actions.changeServerAddress(serverAddress));
         },
     };
 };

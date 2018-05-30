@@ -31,6 +31,7 @@ export interface AppState {
     currentTimestamp: number;
     contactRandom: string;
     screen: Screen;
+    serverAddress: string;
 }
 
 interface Contacts {
@@ -56,6 +57,7 @@ const defaultState: AppState = {
     currentTimestamp: Date.now(),
     contactRandom: '',
     screen: 'home',
+    serverAddress: '192.168.1.3:8546',
 };
 
 const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, action: ActionTypes): Map<string, Contact> => {
@@ -197,12 +199,22 @@ const screenReducer = (screen: Screen = 'home', action: ActionTypes): Screen => 
     return screen;
 };
 
+const serverAddressReducer = (serverAddress = '', action: ActionTypes): string => {
+    switch (action.type) {
+        case 'CHANGE-SERVER-ADDRESS': {
+            return action.serverAddress;
+        }
+    }
+    return serverAddress;
+};
+
 export const reducer = combineReducers<AppState>({
     contacts: contactsReducer,
     user: userReducer,
     currentTimestamp: currentTimestampReducer,
     contactRandom: contactRandomReducer,
     screen: screenReducer,
+    serverAddress: serverAddressReducer,
 });
 
 const persistConfig = {
@@ -224,12 +236,14 @@ export const store = createStore(
     ),
 );
 
-export const persistor = persistStore(store);
+const initStore = () => {
+    setInterval(() => store.dispatch(timeTick()), 1000);
+    setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
+    store.dispatch(connectToNetwork());
+    store.dispatch(generateContactRandom());
+};
 
-setInterval(() => store.dispatch(timeTick()), 1000);
-setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
-store.dispatch(connectToNetwork());
-store.dispatch(generateContactRandom());
+export const persistor = persistStore(store, {}, initStore);
 
 console.log('store: ', store.getState());
 store.subscribe(() => console.log(store.getState()));
