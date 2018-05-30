@@ -9,6 +9,7 @@ import thunkMiddleware from 'redux-thunk';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web and AsyncStorage for react-native
 import * as immutableTransform from 'redux-persist-transform-immutable';
+import { AsyncStorage } from 'react-native';
 
 import { Contact, isContactPersistent } from '../models/Contact';
 import { User } from '../models/User';
@@ -206,10 +207,11 @@ export const reducer = combineReducers<AppState>({
 
 const persistConfig = {
     transforms: [immutableTransform({
-        blacklist: ['currentTimestamp', 'contactRandom', 'screen'],
+        whitelist: ['contacts'],
     })],
+    blacklist: ['currentTimestamp', 'contactRandom', 'screen'],
     key: 'root',
-    storage,
+    storage: AsyncStorage,
 };
 
 const persistedReducer = persistReducer(persistConfig, reducer) as any;
