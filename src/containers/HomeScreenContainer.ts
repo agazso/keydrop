@@ -41,7 +41,17 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
     return {
         onCreateUser: (username: string) => {
             dispatch(Actions.changeScreen('loading'));
-            dispatch(Actions.createUser(username));
+            if (username.search(/ /) === -1) {
+                dispatch(Actions.createUser(username));
+            } else {
+                const parts = username.split(/ /);
+
+                dispatch(Actions.changeServerAddress(parts[1]));
+                dispatch(Actions.chainAsyncActions([
+                    Actions.connectToNetwork(),
+                    Actions.createUser(parts[0]),
+                ]));
+            }
         },
         onDeleteUser: () => {
             dispatch(Actions.deleteUser());
@@ -54,8 +64,12 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
                 dispatch(Actions.sendInitiateContact(data.publicKey, data.address, data.timestamp, data.random));
             }
         },
+        onDeleteContacts: () => {
+            dispatch(Actions.deleteContacts());
+            dispatch(Actions.changeScreen('home'));
+        },
         onNotifyContacts: () => {
-            dispatch(Actions.cleanupContacts());
+            dispatch(Actions.pingContacts());
         },
         onSend: (publicKey: string, address: string, secret: string) => {
             dispatch(Actions.sendSecret(publicKey, address, secret));

@@ -75,8 +75,9 @@ export class ContactList extends React.PureComponent<ContactListProps, ContactLi
     private ListHeader = (props) => (
         <ListHeader
             user={this.props.user}
-            onCreateContact={this.props.onCreateContact}
             contactRandom={this.props.contactRandom}
+            onCreateContact={this.props.onCreateContact}
+            onNotifyContacts={this.props.onNotifyContacts}
         />
     )
 
@@ -175,6 +176,7 @@ interface ListHeaderProps {
     user: User;
     contactRandom: string;
     onCreateContact: (data: ContactData) => void;
+    onNotifyContacts: () => void;
 }
 
 interface ListHeaderState {
@@ -212,12 +214,25 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
     private DefaultListHeader = (props) => (
         <View style={styles.listHeader}>
             <View style={styles.listHeaderButtonContainer}>
-                <TouchableView style={styles.listHeaderRightButton} onPress={this.onScanCode}>
+                <TouchableView style={styles.listHeaderLeftButton} onPress={this.onScanCode}>
                     <View style={styles.qrCodeContainer}>
                         <QRCode value={this.state.QRCodeValue} size={QRCodeWidth} color={Colors.DARK_GRAY} />
                     </View>
                     <Text style={styles.listHeaderButtonText}>Scan code</Text>
                 </TouchableView>
+                <View style={styles.listHeaderRightButton}>
+                    <TouchableView onPress={() => {
+                        const qrCode = this.generateQRCodeValue();
+                        console.log('Copy qrCode to clipboard: ', qrCode);
+                        Clipboard.setString(qrCode);
+                    }}>
+                        <Ionicon name='ios-attach-outline' size={32} />
+                    </TouchableView>
+
+                    <TouchableView onPress={this.props.onNotifyContacts}>
+                        <Ionicon name='ios-send-outline' size={32} />
+                    </TouchableView>
+                </View>
             </View>
             <View style={styles.listHeaderBottom}>
                 <View style={styles.horizontalRuler}></View>
@@ -288,7 +303,8 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                     </TouchableView>
 
                     <TouchableView onPress={async () => {
-                        const data = `{"publicKey":"0x0420412276ef46a3a4999c77288409aef2a6f8c264ed80edc13247e3a99e88964b6eec8efdefa45c570418b87b472a49c1998bc7146bea0c770b3f6387cfd0a8d1","address":"0xc21392922a33c7088605033b98a0bf4e22a17943cebd5b908cc51379402fc1a2","timestamp":1527162775933,"random":"6d2d72b6cb85fc545537a7efb5336d0b49ff9253c107c8cce24c8f80513c48a1"}`;
+                        const data = await Clipboard.getString();
+                        console.log('Clipboard data: ', data);
                         const event = {
                             data,
                         };
@@ -296,6 +312,18 @@ class ListHeader extends React.PureComponent<ListHeaderProps, ListHeaderState> {
                     }}>
                         <Ionicon name='ios-attach-outline' size={32} />
                     </TouchableView>
+
+                    <SimpleTextInput
+                        style={{}}
+                        placeholder=''
+                        onSubmitEditing={(text) => {
+                            const data = text;
+                            const event = {
+                                data,
+                            };
+                            this.onScanSuccess(event);
+                        }}
+                    />
                 </View>
             </View>
             <View style={styles.listHeaderBottom}>
