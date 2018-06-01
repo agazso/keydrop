@@ -12,6 +12,7 @@ export interface StateProps {
 
 export interface DispatchProps {
     onDeleteUser: () => void;
+    onDeleteContacts: () => void;
     onCloseSettings: () => void;
     onChangeServerAddress: (serverAddress: string) => void;
 }
@@ -33,7 +34,14 @@ export class Settings extends React.Component<Props, State> {
                     defaultValue={this.props.serverAddress}
                     onChangeText={this.props.onChangeServerAddress}
                 />
-                <ScrollView style={styles.logContainer} />
+
+                <TouchableView style={styles.buttonContainer} onPress={this.props.onDeleteUser}>
+                    <Text style={styles.deleteText}>Delete user</Text>
+                </TouchableView>
+
+                <TouchableView style={styles.buttonContainer} onPress={this.props.onDeleteContacts}>
+                    <Text style={styles.deleteText}>Delete contacts</Text>
+                </TouchableView>
 
                 <TouchableView onPress={() => {
                         console.log('onPress: onCloseSettings');
@@ -44,9 +52,6 @@ export class Settings extends React.Component<Props, State> {
                     <Ionicon name={CloseIconName} color={Colors.DARK_GRAY} size={IconSize.MEDIUM_LIST_ICON} />
                 </TouchableView>
 
-                <TouchableView style={styles.buttonContainer} onPress={this.props.onDeleteUser}>
-                    <Text style={styles.deleteText}>Delete user</Text>
-                </TouchableView>
             </View>
         );
     }
@@ -62,9 +67,6 @@ const styles = StyleSheet.create({
     buttonContainer: {
         height: 50,
         width: '100%',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
         backgroundColor: Colors.WHITE,
         alignItems: 'center',
     },
