@@ -73,8 +73,8 @@ export const pssSendMessage = async (publicKey: string, address: string, message
     const hexMessage = '0x' + toHexString(string2Bin(message));
     const topic = await pssStringToTopic(defaultTopic);
     const hint = await pssSetHint(publicKey, topic, address, 32);
+    console.log('pssSendMessage: ', address, message);
     const sendResult = await rpcCall(pssRpcRequest('pss_sendAsym', [publicKey, topic, hexMessage]));
-    console.log('pssSendMessage: ', address, message, sendResult);
 };
 
 interface PssSubscriptionResult {
