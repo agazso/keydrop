@@ -57,7 +57,7 @@ const defaultState: AppState = {
     currentTimestamp: Date.now(),
     contactRandom: '',
     screen: 'home',
-    serverAddress: '192.168.1.3:8546',
+    serverAddress: '192.168.1.5:8547',
 };
 
 const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, action: ActionTypes): Map<string, Contact> => {
@@ -235,15 +235,6 @@ export const store = createStore(
         applyMiddleware(thunkMiddleware),
     ),
 );
-
-const initStore = () => {
-    setInterval(() => store.dispatch(timeTick()), 1000);
-    setInterval(() => store.dispatch(pingContacts()), 30 * 1000);
-    store.dispatch(connectToNetwork());
-    store.dispatch(generateContactRandom());
-};
-
-export const persistor = persistStore(store, {}, initStore);
 
 console.log('store: ', store.getState());
 store.subscribe(() => console.log(store.getState()));
