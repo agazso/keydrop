@@ -15,11 +15,11 @@ export const sendPingMessage = (recipientPublicKey: string, recipientAddress: st
     return sendAsymEncryptedMessage(recipientPublicKey, recipientAddress, messageToString(message));
 };
 
-export const sendInitiateContactMessage = (recipientPublicKey: string, recipientAddress: string, timestamp: number, random: string, name: string): Promise<void> => {
+export const sendInitiateContactMessage = (recipientPublicKey: string, recipientAddress: string, ownPublicKey: string, ownAddress: string, timestamp: number, random: string, name: string): Promise<void> => {
     const message: InitiateContactMessage = {
         type: 'initiate-contact',
-        publicKey: recipientPublicKey,
-        address: recipientAddress,
+        publicKey: ownPublicKey,
+        address: ownAddress,
         timestamp,
         random,
         name,

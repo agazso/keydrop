@@ -321,6 +321,7 @@ export const sendInitiateContact = (publicKey: string, address: string, timestam
         return sendInitiateContactMessage(
                 publicKey,
                 address,
+                ownPublicKey,
                 timestamp,
                 random,
                 user.name,
