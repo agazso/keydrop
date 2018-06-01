@@ -378,3 +378,22 @@ export const sendSecret = (publicKey: string, address: string, data: string) => 
         dispatch(updateContactLastTransferStarted(publicKey, Date.now()));
     };
 };
+
+type Thunk = (dispatch: any, getState: () => AppState) => Promise<void>;
+type ThunkTypes = Thunk | ActionTypes;
+
+const isActionTypes = (t: ThunkTypes): t is ActionTypes => {
+    return (t as ActionTypes).type !== undefined;
+};
+
+export const chainAsyncActions = (thunks: ThunkTypes[]) => {
+    return async (dispatch, getState: () => AppState) => {
+        for (const thunk of thunks) {
+            if (isActionTypes(thunk)) {
+                dispatch(thunk);
+            } else {
+                await thunk(dispatch, getState);
+            }
+        }
+    };
+};
