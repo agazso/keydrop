@@ -4,6 +4,9 @@
 # the websocket ip and port and you can specify other swarm arguments.
 #
 # In this script the discovery is disabled with the --nodiscover flag
+# If you want to start more than one node, you will need to specify the port with
+# the --port flag, and the default value is 30399, so you need to use a different value.
+# (e.g. --port 30400)
 
 if [ "$1" = "" ]; then
     echo "Usage: swarm-local.sh <datadir> <websocket-ip-address> <websocket-port> <other-swarm-arguments>"
