@@ -49,6 +49,10 @@ const isRequest = <MethodType, ParamType>(r: RpcRequest<MethodType, ParamType> |
 };
 
 export const rpcConnect = async <MethodType, ParamType>(serverAddress, conn: ConnectionHandler<RpcRequest<MethodType, ParamType>> = {}): Promise<Connection> => {
+    if (connection != null) {
+        connection.close();
+        connection = undefined;
+    }
     const connectPromise = new Promise<Connection>((resolve, reject) => {
         const onOpen = () => {
             resolve(connection);
