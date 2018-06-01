@@ -9,11 +9,13 @@ export interface ConnectionHandler<MessageType> {
 
 export interface Connection {
     send: (data: string) => void;
+    close: () => void;
 }
 
 interface ConnectionHolder {
     state: 'disconnected' | 'connecting' | 'connected';
     ws: WebSocket | null;
+    timeoutHandler: number | null;
 }
 
 export const wsConnect = (serverAddress: string, conn: ConnectionHandler<string>): Connection => {
@@ -21,6 +23,7 @@ export const wsConnect = (serverAddress: string, conn: ConnectionHandler<string>
     const connHolder: ConnectionHolder = {
         state: 'disconnected',
         ws: null,
+        timeoutHandler: null,
     };
 
     const setupConnection = (ch) => {
@@ -56,7 +59,7 @@ export const wsConnect = (serverAddress: string, conn: ConnectionHandler<string>
             if (conn.onClose != null) {
                 conn.onClose(e.code, e.reason);
             }
-            console.log('Disconnected with close');
+            console.log('Disconnected with close from ', serverAddress);
             ch.state = 'disconnected';
             if (ch.state !== 'connecting') {
                 ch.state = 'connecting';
@@ -71,6 +74,13 @@ export const wsConnect = (serverAddress: string, conn: ConnectionHandler<string>
         send: (data: string): void => {
             console.log('Sending data: ', data);
             connHolder.ws!.send(data);
+        },
+        close: (): void => {
+            if (connHolder.timeoutHandler != null) {
+                clearTimeout(connHolder.timeoutHandler);
+                connHolder.timeoutHandler = null;
+            }
+            connHolder.ws!.close();
         },
     };
 };
