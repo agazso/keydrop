@@ -5,7 +5,11 @@ export const hexToString = (hex: string): string => {
         subStrings.push(hexWithoutPrefix.substr(i, 2));
     }
     const numbers = subStrings.map(s => parseInt(s, 16));
-    return String.fromCodePoint(...numbers);
+    if (String.fromCodePoint != null) {
+        return String.fromCodePoint(...numbers);
+    } else {
+        return String.fromCharCode(...numbers);
+    }
 };
 
 // cheekily borrowed from https://stackoverflow.com/questions/34309988/byte-array-to-hex-string-conversion-in-javascript
