@@ -46,8 +46,8 @@ const mapDispatchToProps = (dispatch): DispatchProps => {
             } else {
                 const parts = username.split(/ /);
 
-                dispatch(Actions.changeServerAddress(parts[1]));
-                dispatch(Actions.chainAsyncActions([
+                dispatch(Actions.chainActions([
+                    Actions.changeServerAddress(parts[1]),
                     Actions.connectToNetwork(),
                     Actions.createUser(parts[0]),
                 ]));
