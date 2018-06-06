@@ -9,11 +9,14 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import <Keydropgo/Keydropgo.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  char* result = StartNode("dir", ":0", "");
+  NSLog(@"result: %s", result);
   NSURL *jsCodeLocation;
 
 #ifdef DEBUG
