@@ -1,21 +1,56 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
+import { persistStore, Persistor } from 'redux-persist';
 import { View, Text, StatusBar, Platform, TouchableWithoutFeedback } from 'react-native';
 import { PersistGate } from 'redux-persist/integration/react';
 
-import { store, persistor } from './reducers/index';
+import { store } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
 import { HeaderTitleContainer } from './containers/HeaderTitleContainer';
+import * as Actions from './actions/Actions';
 
-export default class App extends React.Component {
+import { NativeModules } from 'react-native';
+
+// NativeModules.Swarm.start();
+
+interface State {
+    rehydrated: boolean;
+}
+
+export default class App extends React.Component<{}, State> {
+    public state = {
+        rehydrated: false,
+    };
+
+    private persistor: Persistor | null = null;
+
+    public componentDidMount() {
+        const initStore = () => {
+            // setInterval(() => store.dispatch(timeTick()), 1000);
+            // setInterval(() => store.dispatch(Actions.pingContacts()), 30 * 1000);
+            store.dispatch(Actions.connectToNetwork());
+            store.dispatch(Actions.generateContactRandom());
+            this.setState({
+                rehydrated: true,
+            });
+        };
+
+        const persistor = persistStore(store, {}, initStore);
+    }
+
     public render() {
-        return (
-            <Provider store={store}>
-                <PersistGate loading={null} persistor={persistor}>
-                    <HeaderTitleContainer/>
+        if (this.state.rehydrated === false) {
+            return (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text>Loading...</Text>
+                </View>
+            );
+        } else {
+            return (
+                <Provider store={store}>
                     <HomeScreenContainer/>
-                </PersistGate>
-            </Provider>
-        );
+                </Provider>
+            );
+        }
     }
 }

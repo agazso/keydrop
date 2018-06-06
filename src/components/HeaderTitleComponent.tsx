@@ -5,6 +5,7 @@ import Ionicon from 'react-native-vector-icons/Ionicons';
 import { TouchableView } from './TouchableView';
 import { Colors, IconSize } from '../styles';
 import { StatusBarBackground } from './StatusBarBackground';
+import { Screen } from '../Screen';
 
 const onPress = () => {
     // TODO scroll to top
@@ -13,10 +14,11 @@ const onPress = () => {
 const SettingsIconName = Platform.OS === 'ios' ? 'ios-settings' : 'md-settings';
 
 export interface StateProps {
+    screenToShow: Screen;
 }
 
 export interface DispatchProps {
-    onPressSettings: () => void;
+    onPressSettings: (currentScreen: Screen) => void;
 }
 
 type Props = StateProps & DispatchProps;
@@ -29,7 +31,7 @@ export const HeaderTitleComponent = (props: Props) =>
             <Text style={styles.titleText}>Keydrop</Text>
             <TouchableView
                 style={styles.settingsIconContainer}
-                onPress={props.onPressSettings}
+                onPress={() => props.onPressSettings(props.screenToShow)}
             >
                 <Ionicon name={SettingsIconName} color={Colors.DARK_GRAY} size={IconSize.MEDIUM_LIST_ICON} />
             </TouchableView>
@@ -41,9 +43,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
-        height: 40,
+        height: 50,
         alignItems: 'center',
-        paddingTop: 20,
+        paddingTop: 10,
+        backgroundColor: Colors.WHITE,
     },
     settingsIconContainer: {
         width: 30,

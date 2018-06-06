@@ -3,13 +3,21 @@ import { Map } from 'immutable';
 
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
-import { connect, sendInitiateContactMessage, sendPingMessage, sendSecretMessage, sendAckSendMessage } from '../network/Network';
+import {
+    sendInitiateContactMessage,
+    sendPingMessage,
+    sendSecretMessage,
+    sendAckSendMessage,
+} from '../network/Network';
 import { getRandomStrings, generateRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
 import { encryptWithPublicKey } from '../crypto';
-import { PrivateIdentity } from '../models/Identity';
+import { PrivateIdentity, PublicIdentity } from '../models/Identity';
+import { pssGetPublicKey, pssGetBaseAddress, pssConnect } from '../network/pssRpc';
+import { rpcConnect } from '../network/JSONRPC';
+import { Screen } from '../Screen';
 
 export type ActionTypes =
     | CreateUserWithIdentityAction
@@ -23,12 +31,14 @@ export type ActionTypes =
     | UpdateContactRandomAction
     | CleanupContactsAction
     | DeleteContactsAction
+    | ChangeScreenAction
+    | ChangeServerAddress
     ;
 
 export interface CreateUserWithIdentityAction {
     type: 'CREATE-USER-WITH-IDENTITY';
     name: string;
-    identity: PrivateIdentity;
+    identity: PublicIdentity;
 }
 
 export interface DeleteUserAction {
@@ -42,6 +52,7 @@ export interface TimeTickAction {
 export interface CreateContactAction {
     type: 'CREATE-CONTACT';
     publicKey: string;
+    address: string;
     name: string;
     state: ContactState;
 }
@@ -83,7 +94,17 @@ export interface DeleteContactsAction {
     type: 'DELETE-CONTACTS';
 }
 
-export const createUserWithIdentity = (name: string, identity: PrivateIdentity): CreateUserWithIdentityAction => ({
+export interface ChangeScreenAction {
+    type: 'CHANGE-SCREEN';
+    screen: Screen;
+}
+
+export interface ChangeServerAddress {
+    type: 'CHANGE-SERVER-ADDRESS';
+    serverAddress: string;
+}
+
+export const createUserWithIdentity = (name: string, identity: PublicIdentity): CreateUserWithIdentityAction => ({
     type: 'CREATE-USER-WITH-IDENTITY',
     name,
     identity,
@@ -97,9 +118,10 @@ export const timeTick = (): TimeTickAction => ({
     type: 'TIME-TICK',
 });
 
-export const createContact = (publicKey: string, name: string, state: ContactState): CreateContactAction => ({
+export const createContact = (publicKey: string, address: string, name: string, state: ContactState): CreateContactAction => ({
     type: 'CREATE-CONTACT',
     publicKey,
+    address,
     name,
     state,
 });
@@ -141,13 +163,26 @@ export const deleteContacts = (): DeleteContactsAction => ({
     type: 'DELETE-CONTACTS',
 });
 
+export const changeScreen = (screen: Screen): ChangeScreenAction => ({
+    type: 'CHANGE-SCREEN',
+    screen,
+});
+
+export const changeServerAddress = (serverAddress: string): ChangeServerAddress => ({
+    type: 'CHANGE-SERVER-ADDRESS',
+    serverAddress,
+});
+
 export const createUser = (name: string) => {
     return async (dispatch, getState: () => AppState) => {
-        const identity: PrivateIdentity = {
-            publicKey: await generateRandomString(32),
-            privateKey: await generateRandomString(32),
+        const publicKey = await pssGetPublicKey();
+        const address = await pssGetBaseAddress();
+        const identity: PublicIdentity = {
+            publicKey,
+            address,
         };
         dispatch(createUserWithIdentity(name, identity));
+        dispatch(pingSelf());
     };
 };
 
@@ -161,7 +196,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                 if (contacts.has(message.publicKey)) {
                     const contact = contacts.get(message.publicKey);
                     if (!isContactOnline(contact)) {
-                        dispatch(pingContact(contact.publicKey));
+                        dispatch(pingContact(contact.publicKey, contact.address));
                     }
                     dispatch(updateContactLastSeen(contact.publicKey, Date.now()));
                     if (contact.state === 'invite-received') {
@@ -187,7 +222,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                     dispatch(updateContactName(contact.publicKey, message.name));
                     dispatch(updateContactLastSeen(contact.publicKey, Date.now()));
                     dispatch(updateContactState(contact.publicKey, 'contact'));
-                    dispatch(pingContact(contact.publicKey));
+                    dispatch(pingContact(contact.publicKey, contact.address));
                     return;
                 }
 
@@ -196,12 +231,15 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
                     return;
                 }
 
-                dispatch(createContact(message.publicKey, message.name, 'invite-received'));
-                dispatch(sendInitiateContact(message.publicKey, message.timestamp, message.random));
+                dispatch(createContact(message.publicKey, message.address, message.name, 'invite-received'));
+                dispatch(sendInitiateContact(message.publicKey, message.address, message.timestamp, message.random));
                 return;
             }
             case 'secret': {
-                await sendAckSendMessage(message.publicKey, state.user.identity.publicKey, message.id);
+                if (state.contacts.has(message.publicKey)) {
+                    const contact = state.contacts.get(message.publicKey)!;
+                    await sendAckSendMessage(contact.publicKey, contact.address, state.user.identity.publicKey, message.id);
+                }
                 const contactName = getContactName(state.contacts, message.publicKey);
                 const buttons: AlertButton[] = [
                     {
@@ -257,27 +295,34 @@ const showSecretDialog = (secret: string) => {
 
 export const connectToNetwork = () => {
     return async (dispatch, getState: () => AppState) => {
-        const user = getState().user;
-        const ownPublicKey = user.identity.publicKey;
-        connect(ownPublicKey, {
+        const serverAddress = getState().serverAddress;
+        await pssConnect(serverAddress, {
             onOpen: () => {
-                dispatch(pingSelf());
                 dispatch(pingContacts());
             },
-            onMessage: (envelope: MessageEnvelope) => {
+            onMessage: (message: string) => {
+                console.log('onMessage: ', message);
+                const envelope: MessageEnvelope = {
+                    recipient: '',
+                    sender: '',
+                    payload: message,
+                };
                 dispatch(receiveMessageEnvelope(envelope));
             },
         });
     };
 };
 
-export const sendInitiateContact = (publicKey: string, timestamp: number, random: string) => {
+export const sendInitiateContact = (publicKey: string, address: string, timestamp: number, random: string) => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
+        const ownAddress = user.identity.address;
         return sendInitiateContactMessage(
                 publicKey,
+                address,
                 ownPublicKey,
+                ownAddress,
                 timestamp,
                 random,
                 user.name,
@@ -291,18 +336,20 @@ export const pingContacts = () => {
         const ownPublicKey = user.identity.publicKey;
         const contacts = getState().contacts.toArray();
         const sendMessages = contacts.map(
-            (contact, index) => sendPingMessage(contact.publicKey, ownPublicKey),
+            (contact, index) => {
+                sendPingMessage(contact.publicKey, contact.address, ownPublicKey);
+            }
         );
 
         return Promise.all(sendMessages);
     };
 };
 
-export const pingContact = (recipientPublicKey: string) => {
+export const pingContact = (recipientPublicKey: string, recipientAddress: string) => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
-        return sendPingMessage(recipientPublicKey, ownPublicKey);
+        return sendPingMessage(recipientPublicKey, recipientAddress, ownPublicKey);
     };
 };
 
@@ -310,7 +357,8 @@ export const pingSelf = () => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
-        return sendPingMessage(ownPublicKey, ownPublicKey);
+        const ownAddress = user.identity.address;
+        return sendPingMessage(ownPublicKey, ownAddress, ownPublicKey);
     };
 };
 
@@ -321,12 +369,31 @@ export const generateContactRandom = () => {
     };
 };
 
-export const sendData = (publicKey: string, data: string) => {
+export const sendSecret = (publicKey: string, address: string, data: string) => {
     return async (dispatch, getState: () => AppState) => {
         const user = getState().user;
         const ownPublicKey = user.identity.publicKey;
         console.log('Sending data', publicKey, data);
-        await sendSecretMessage(publicKey, ownPublicKey, data);
+        await sendSecretMessage(publicKey, address, ownPublicKey, data);
         dispatch(updateContactLastTransferStarted(publicKey, Date.now()));
+    };
+};
+
+type Thunk = (dispatch: any, getState: () => AppState) => Promise<void>;
+type ThunkTypes = Thunk | ActionTypes;
+
+const isActionTypes = (t: ThunkTypes): t is ActionTypes => {
+    return (t as ActionTypes).type !== undefined;
+};
+
+export const chainActions = (thunks: ThunkTypes[]) => {
+    return async (dispatch, getState: () => AppState) => {
+        for (const thunk of thunks) {
+            if (isActionTypes(thunk)) {
+                dispatch(thunk);
+            } else {
+                await thunk(dispatch, getState);
+            }
+        }
     };
 };

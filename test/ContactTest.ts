@@ -6,8 +6,10 @@ it('should test if contact is persistent', () => {
         state: 'contact',
         name: 'Alice',
         publicKey: '0xPUBKEY',
+        address: '',
         knownSince: 0,
         lastSeen: 0,
+        lastTransferStarted: 0,
     };
 
     const result = isContactPersistent(contact);
@@ -20,8 +22,10 @@ it('should test if contact is not persistent', () => {
         state: 'invite-sent',
         name: 'Alice',
         publicKey: '0xPUBKEY',
+        address: '',
         knownSince: 0,
         lastSeen: 0,
+        lastTransferStarted: 0,
     };
 
     const result = isContactPersistent(contact);

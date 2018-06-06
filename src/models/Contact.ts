@@ -7,6 +7,7 @@ export interface Contact {
     state: ContactState;
     name: string;
     publicKey: string;
+    address: string;
     knownSince: number;
     lastSeen: number;
     lastTransferStarted: number;
