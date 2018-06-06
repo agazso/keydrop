@@ -15,7 +15,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  char* result = StartNode("dir", ":0", "");
+  NSString *appFolderPath = [[NSBundle mainBundle] resourcePath];
+  NSLog(@"App Directory is: %@", appFolderPath);
+  const char *cfilename=[appFolderPath UTF8String];
+  char *result = StartNode((char *)cfilename, ":0", "");
   NSLog(@"result: %s", result);
   NSURL *jsCodeLocation;
 
