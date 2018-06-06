@@ -22,6 +22,9 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 
+# keydrop-go framework dependency
+ios/Keydropgo.framework
+
 # Android/IntelliJ
 #
 build/
