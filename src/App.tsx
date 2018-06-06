@@ -9,10 +9,6 @@ import { HomeScreenContainer } from './containers/HomeScreenContainer';
 import { HeaderTitleContainer } from './containers/HeaderTitleContainer';
 import * as Actions from './actions/Actions';
 
-import { NativeModules } from 'react-native';
-
-// NativeModules.Swarm.start();
-
 interface State {
     rehydrated: boolean;
 }
