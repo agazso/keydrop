@@ -3,6 +3,8 @@ import { Connect } from 'react-redux';
 import { rpcRequest, rpcCall, RpcRequest, rpcConnect } from './JSONRPC';
 import { hexToString, toHexString, string2Bin } from '../string';
 
+const PssHeartbeatTimeout = 30 * 1000;
+
 type PssRpcOutgoingMethod =
     | 'pss_getPublicKey'
     | 'pss_baseAddr'
@@ -45,11 +47,28 @@ export const pssSetHint = async (publicKey: string, topic: string, address: stri
     return await rpcCall(pssRpcRequest('pss_setPeerPublicKey', [publicKey, topic, addressHint]));
 };
 
+interface IntervalHandle {
+    intervalHandle?: number;
+}
+
 const defaultTopic = 'keydrop';
 export const pssConnect = async (serverAddress: string, conn: ConnectionHandler<string>) => {
-    const rpcConnectionHandler: ConnectionHandler<RpcRequest<PssRpcIncomingMethod, PssSubscription>> = {
-        onOpen: undefined,
-        onClose: conn.onClose,
+    const rpcConnectionHandler: ConnectionHandler<RpcRequest<PssRpcIncomingMethod, PssSubscription>> & IntervalHandle = {
+        intervalHandle: undefined,
+        onOpen: () => {
+            if (conn.onOpen != null) {
+                conn.onOpen();
+            }
+            rpcConnectionHandler.intervalHandle = setInterval(async () => {
+                await rpcCall(pssRpcRequest('pss_getPublicKey', ['ping']));
+            }, PssHeartbeatTimeout);
+        },
+        onClose: (code, reason) => {
+            if (conn.onClose != null) {
+                conn.onClose(code, reason);
+            }
+            clearInterval(rpcConnectionHandler.intervalHandle);
+        },
         onError: conn.onError,
         onMessage: (request) => {
             if (conn.onMessage != null) {
