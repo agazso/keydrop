@@ -9,11 +9,17 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import <Keydropgo/Keydropgo.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  NSString *appFolderPath = [[NSBundle mainBundle] resourcePath];
+  NSLog(@"App Directory is: %@", appFolderPath);
+  const char *cfilename=[appFolderPath UTF8String];
+  char *result = StartNode((char *)cfilename, ":0", "");
+  NSLog(@"result: %s", result);
   NSURL *jsCodeLocation;
 
 #ifdef DEBUG
