@@ -386,7 +386,7 @@ const isActionTypes = (t: ThunkTypes): t is ActionTypes => {
     return (t as ActionTypes).type !== undefined;
 };
 
-export const chainActions = (thunks: ThunkTypes[]) => {
+export const chainActions = (thunks: ThunkTypes[], callback?: () => void) => {
     return async (dispatch, getState: () => AppState) => {
         for (const thunk of thunks) {
             if (isActionTypes(thunk)) {
@@ -394,6 +394,9 @@ export const chainActions = (thunks: ThunkTypes[]) => {
             } else {
                 await thunk(dispatch, getState);
             }
+        }
+        if (callback != null) {
+            callback();
         }
     };
 };
