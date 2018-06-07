@@ -19,6 +19,7 @@ shift
 
 BZZ_ADDRESS=$(cat $DATADIR/keystore/* | jq -r .address)
 BOOTNODE='enode://867ba5f6ac80bec876454caa80c3d5b64579828bd434a972bd8155060cac36226ba6e4599d955591ebdd1b2670da13cbaba3878928f3cd23c55a4e469a927870@13.79.37.4:30399'
+VERBOSITY=3
 
-swarm --verbosity 3 --bzzaccount $BZZ_ADDRESS --bootnodes $BOOTNODE --ws --wsaddr $WSADDR --wsport $WSPORT --wsorigins http://$WSADDR:$WSPORT --datadir $DATADIR --vmodule=swarm/pss=6 $*
+swarm --verbosity $VERBOSITY --bzzaccount $BZZ_ADDRESS --bootnodes $BOOTNODE --ws --wsaddr $WSADDR --wsport $WSPORT --wsorigins http://$WSADDR:$WSPORT --datadir $DATADIR --vmodule=swarm/pss=6 $*
 

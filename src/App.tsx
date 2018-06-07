@@ -24,8 +24,11 @@ export default class App extends React.Component<{}, State> {
         const initStore = () => {
             // setInterval(() => store.dispatch(timeTick()), 1000);
             // setInterval(() => store.dispatch(Actions.pingContacts()), 30 * 1000);
-            store.dispatch(Actions.connectToNetwork());
-            store.dispatch(Actions.generateContactRandom());
+            store.dispatch(Actions.chainActions([
+                Actions.generateContactRandom(),
+                Actions.connectToNetwork(),
+            ]));
+
             this.setState({
                 rehydrated: true,
             });
