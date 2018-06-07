@@ -57,7 +57,7 @@ const defaultState: AppState = {
     currentTimestamp: Date.now(),
     contactRandom: '',
     screen: 'home',
-    serverAddress: '192.168.1.5:8547',
+    serverAddress: '127.0.0.1:8546',
 };
 
 const contactsReducer = (contacts: Map<string, Contact> = defaultContacts, action: ActionTypes): Map<string, Contact> => {
