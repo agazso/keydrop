@@ -9,7 +9,7 @@ import {
     sendSecretMessage,
     sendAckSendMessage,
 } from '../network/Network';
-import { getRandomStrings, generateRandomString } from '../random';
+import { getUnsecureRandomStrings, generateUnsecureRandomString } from '../random';
 import { AppState } from '../reducers';
 import { isTimestampValid } from '../validation';
 import { Message, MessageEnvelope } from '../network/Message';
@@ -364,7 +364,7 @@ export const pingSelf = () => {
 
 export const generateContactRandom = () => {
     return async (dispatch, getState: () => AppState) => {
-        const random = await generateRandomString(32);
+        const random = await generateUnsecureRandomString(32);
         dispatch(updateContactRandom(random));
     };
 };

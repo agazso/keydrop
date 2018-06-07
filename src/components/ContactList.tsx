@@ -23,7 +23,7 @@ import { Colors, DefaultFont, IconSize } from '../styles';
 import { TouchableView } from './TouchableView';
 import { PrivateIdentity } from '../models/Identity';
 import { User } from '../models/User';
-import { generateRandomString } from '../random';
+import { generateUnsecureRandomString } from '../random';
 import { testUserBob } from '../reducers/index';
 import { SimpleTextInput } from './SimpleTextInput';
 import { ContactItem } from './ContactItem';

@@ -22,7 +22,7 @@ import {
     pingContacts,
     connectToNetwork,
 } from '../actions/Actions';
-import { generateRandomString } from '../random';
+import { generateUnsecureRandomString } from '../random';
 import { Screen } from '../Screen';
 
 export interface AppState {
