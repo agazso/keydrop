@@ -24,6 +24,7 @@ project.xcworkspace
 
 # keydrop-go framework dependency
 ios/Keydropgo.framework
+android/app/lib/keydropgo*
 
 # Android/IntelliJ
 #
