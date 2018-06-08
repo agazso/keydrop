@@ -1,5 +1,5 @@
 import { Alert, AlertButton, Clipboard } from 'react-native';
-import { Map } from 'immutable';
+import { Map as ImmutableMap } from 'immutable';
 
 import { User } from '../models/User';
 import { Contact, ContactState, isContactOnline } from '../models/Contact';
@@ -18,6 +18,7 @@ import { PrivateIdentity, PublicIdentity } from '../models/Identity';
 import { pssGetPublicKey, pssGetBaseAddress, pssConnect } from '../network/pssRpc';
 import { rpcConnect } from '../network/JSONRPC';
 import { Screen } from '../Screen';
+import { cleanupOldMessages, testAndSetMessage } from '../network/MessageCache';
 
 export type ActionTypes =
     | CreateUserWithIdentityAction
@@ -186,9 +187,24 @@ export const createUser = (name: string) => {
     };
 };
 
+export const cleanupSeenMessages = () => {
+    return async (dispatch, getState: () => AppState) => {
+        const currentTimestamp = getState().currentTimestamp;
+        cleanupOldMessages(currentTimestamp - 5 * 60 * 1000);
+    };
+};
+
 export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
     return async (dispatch, getState: () => AppState) => {
         const message = JSON.parse(envelope.payload) as Message;
+
+        if (message.messageId != null) {
+            const hasSeenMessage = testAndSetMessage(message.messageId, getState().currentTimestamp);
+            if (hasSeenMessage) {
+                return;
+            }
+        }
+
         const state = getState();
         switch (message.type) {
             case 'ping': {
@@ -271,7 +287,7 @@ export const receiveMessageEnvelope = (envelope: MessageEnvelope) => {
     };
 };
 
-const getContactName = (contacts: Map<string, Contact>, publicKey: string): string => {
+const getContactName = (contacts: ImmutableMap<string, Contact>, publicKey: string): string => {
     if (contacts.has(publicKey)) {
         return contacts.get(publicKey)!.name;
     }

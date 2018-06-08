@@ -1,5 +1,6 @@
 export interface MessageBase {
     publicKey: string;
+    messageId?: string;
 }
 
 export interface InitiateContactMessage extends MessageBase {

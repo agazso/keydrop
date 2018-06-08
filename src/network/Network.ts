@@ -3,8 +3,21 @@ import { Message, PingMessage, InitiateContactMessage, MessageEnvelope, SecretMe
 import { Connection, ConnectionHandler } from './Connection';
 import { pssSendMessage } from './pssRpc';
 
+let nextMessageId = 0;
+const generateMessageId = (prefix: string) => {
+    const messageId = prefix + '/' + nextMessageId;
+    nextMessageId += 1;
+    return messageId;
+};
+
 const messageToString = (message: Message): string => {
-    return JSON.stringify(message);
+    const messageToSend = {
+        ...message,
+        messageId: message.messageId == null
+            ? generateMessageId(message.publicKey)
+            : message.messageId,
+    }
+    return JSON.stringify(messageToSend);
 };
 
 export const sendPingMessage = (recipientPublicKey: string, recipientAddress: string, ownPublicKey: string): Promise<void> => {
@@ -46,6 +59,15 @@ export const sendAckSendMessage = (recipientPublicKey: string, recipientAddress:
     return sendAsymEncryptedMessage(recipientPublicKey, recipientAddress, messageToString(message));
 };
 
+const pssSendMessageWithDelay = (delay: number, publicKey: string, address: string, message: string) => {
+    setTimeout(async () => {
+        await pssSendMessage(publicKey, address, message);
+    }, delay);
+};
+
 const sendAsymEncryptedMessage = (recipientPublicKey: string, recipientAddress: string, message: string): Promise<void> => {
+    pssSendMessageWithDelay(5 * 1000, recipientPublicKey, recipientAddress, message);
+    pssSendMessageWithDelay(10 * 1000, recipientPublicKey, recipientAddress, message);
+    pssSendMessageWithDelay(15 * 1000, recipientPublicKey, recipientAddress, message);
     return pssSendMessage(recipientPublicKey, recipientAddress, message);
 };
