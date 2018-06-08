@@ -8,6 +8,7 @@ import { store } from './reducers/index';
 import { HomeScreenContainer } from './containers/HomeScreenContainer';
 import { HeaderTitleContainer } from './containers/HeaderTitleContainer';
 import * as Actions from './actions/Actions';
+import { timeTick } from './actions/Actions';
 
 interface State {
     rehydrated: boolean;
@@ -22,8 +23,8 @@ export default class App extends React.Component<{}, State> {
 
     public componentDidMount() {
         const initStore = () => {
-            // setInterval(() => store.dispatch(timeTick()), 1000);
-            // setInterval(() => store.dispatch(Actions.pingContacts()), 30 * 1000);
+            setInterval(() => store.dispatch(timeTick()), 1000);
+            setInterval(() => store.dispatch(Actions.pingContacts()), 30 * 1000);
             store.dispatch(
                 Actions.chainActions([
                     Actions.generateContactRandom(),
