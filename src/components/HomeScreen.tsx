@@ -72,7 +72,9 @@ class ContactsWithSettingsModal extends React.Component<Props & SettingsProps> {
                     visible={this.props.visible}
                     onRequestClose={this.props.onCloseSettings}
                 >
-                    <Settings {...this.props} />
+                    <SafeAreaView style={styles.listContainer}>
+                        <Settings {...this.props} />
+                    </SafeAreaView>
                 </Modal>
                 <ContactListWithHeader {...this.props} />
             </View>
